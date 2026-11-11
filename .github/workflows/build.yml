@@ -1,3 +1,4 @@
+
 name: Build grammars
 
 on:
@@ -26,15 +27,18 @@ jobs:
         run: python -m json.tool grammar/alloy.tmLanguage.json > /dev/null
 
       - name: Validate generated VS Code grammar
-        run: python -m json.tool editors/vscode/syntaxes/alloy.tmLanguage.json > /dev/null
+        run: python -m json.tool vscode/syntaxes/alloy.tmLanguage.json > /dev/null
 
       - name: Validate generated Sublime plist
-        run: python -c "import plistlib; plistlib.load(open('editors/sublime/Alloy.tmLanguage', 'rb'))"
+        run: python -c "import plistlib; plistlib.load(open('sublime/Alloy.tmLanguage', 'rb'))"
+
+      - name: Check generated files are up to date
+        run: git diff --exit-code
 
       - name: Upload generated grammars
         uses: actions/upload-artifact@v4
         with:
           name: alloy-editor-grammars
           path: |
-            editors/vscode/syntaxes/alloy.tmLanguage.json
-            editors/sublime/Alloy.tmLanguage
+            vscode/syntaxes/alloy.tmLanguage.json
+            sublime/Alloy.tmLanguage
