@@ -1,0 +1,40 @@
+name: Build grammars
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Build editor grammars
+        run: python scripts/build.py
+
+      - name: Validate canonical JSON grammar
+        run: python -m json.tool grammar/alloy.tmLanguage.json > /dev/null
+
+      - name: Validate generated VS Code grammar
+        run: python -m json.tool editors/vscode/syntaxes/alloy.tmLanguage.json > /dev/null
+
+      - name: Validate generated Sublime plist
+        run: python -c "import plistlib; plistlib.load(open('editors/sublime/Alloy.tmLanguage', 'rb'))"
+
+      - name: Upload generated grammars
+        uses: actions/upload-artifact@v4
+        with:
+          name: alloy-editor-grammars
+          path: |
+            editors/vscode/syntaxes/alloy.tmLanguage.json
+            editors/sublime/Alloy.tmLanguage
