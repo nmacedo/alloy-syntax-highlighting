@@ -1,0 +1,61 @@
+
+name: Sync Sublime package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "grammar/**"
+      - "scripts/build-sublime.py"
+      - "sublime/**"
+      - "LICENSE"
+      - ".github/workflows/sync-sublime.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Build and publish Sublime package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out main repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generate Sublime grammar
+        run: python scripts/build-sublime.py
+
+      - name: Check out Sublime distribution repository
+        uses: actions/checkout@v4
+        with:
+          repository: nmacedo/alloy-6-sublime
+          token: ${{ secrets.SUBLIME_REPO_TOKEN }}
+          path: sublime-dist
+
+      - name: Copy distribution files
+        run: |
+          cp sublime/Alloy.tmLanguage sublime-dist/Alloy.tmLanguage
+          cp sublime/README.md sublime-dist/README.md
+          cp LICENSE sublime-dist/LICENSE
+
+      - name: Commit and push changes
+        run: |
+          git -C sublime-dist config user.name "github-actions[bot]"
+          git -C sublime-dist config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git -C sublime-dist add Alloy.tmLanguage README.md LICENSE
+
+          if ! git -C sublime-dist diff --cached --quiet; then
+            git -C sublime-dist commit -m "Update Alloy 6 syntax grammar"
+            git -C sublime-dist push origin HEAD:main
+          else
+            echo "No changes to publish."
+          fi
