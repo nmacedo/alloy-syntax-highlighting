@@ -1,0 +1,488 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Alloy",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#module-paths" },
+    { "include": "#sig-declaration" },
+    { "include": "#declaration-keywords" },
+    { "include": "#meta-identifiers" },
+    { "include": "#keywords" },
+    { "include": "#groups" },
+    { "include": "#brackets" },
+    { "include": "#blocks" },
+    { "include": "#punctuation" },
+    { "include": "#operators" },
+    { "include": "#constants" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+          {
+              "name": "comment.line.double-slash.alloy",
+              "begin": "//",
+              "beginCaptures": {
+                  "0": {"name": "punctuation.definition.comment.alloy"}
+              },
+              "end": "$"
+          },
+          {
+              "name": "comment.line.double-dash.alloy",
+              "begin": "--",
+              "beginCaptures": {
+                  "0": {"name": "punctuation.definition.comment.alloy"}
+              },
+              "end": "$"
+          },
+          {
+              "name": "comment.block.documentation.alloy",
+              "begin": "/\\*\\*(?!/)",
+              "beginCaptures": {
+                  "0": {"name": "punctuation.definition.comment.alloy"}
+              },
+              "end": "\\*/",
+              "endCaptures": {
+                  "0": {"name": "punctuation.definition.comment.alloy"}
+              }
+          },
+          {
+              "name": "comment.block.alloy",
+              "begin": "/\\*",
+              "beginCaptures": {
+                  "0": {"name": "punctuation.definition.comment.alloy"}
+              },
+              "end": "\\*/",
+              "endCaptures": {
+                  "0": {"name": "punctuation.definition.comment.alloy"}
+              }
+          }
+      ]
+    },
+     "strings": {
+        "name": "meta.string.alloy",
+        "contentName": "string.quoted.double.alloy",
+        "begin": "\"",
+        "beginCaptures": {
+            "0": {"name": "punctuation.definition.string.begin.alloy"}
+        },
+        "end": "\"",
+        "endCaptures": {
+            "0": {"name": "punctuation.definition.string.end.alloy"}
+        },
+        "patterns": [
+            {
+                "name": "constant.character.escape.alloy",
+                "match": "\\\\."
+            }
+        ]
+    },
+    "declaration-keywords": {
+        "patterns": [
+            {
+                "name": "storage.type.function.alloy",
+                "match": "\\b(pred|fun|let)\\b",
+                "captures": {
+                    "1": {"name": "keyword.declaration.function.alloy"}
+                }
+            },
+            {
+                "name": "storage.type.enum.alloy",
+                "match": "\\b(enum)\\b",
+                "captures": {
+                    "1": {"name": "keyword.declaration.enum.alloy"}
+                }
+            },
+            {
+                "name": "storage.type.namespace.alloy",
+                "match": "\\b(module)\\b",
+                "captures": {
+                    "1": {"name": "keyword.declaration.namespace.alloy"}
+                }
+            },
+            {
+              "name": "keyword.declaration.command.alloy",
+              "match": "\\b(run|check)\\b"
+            },
+            {
+              "name": "keyword.declaration.assert.alloy",
+              "match": "\\b(assert)\\b"
+            },
+            {
+              "name": "keyword.declaration.fact.alloy",
+              "match": "\\b(fact)\\b"
+            }
+        ]
+    },
+    "module-parameters": {
+      "name": "meta.parameters.module.alloy",
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.begin.alloy"
+        }
+      },
+      "end": "\\]",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.end.alloy"
+        }
+      },
+      "patterns": [
+        {
+          "name": "variable.other.alloy",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        },
+        {
+          "name": "punctuation.separator.comma.alloy",
+          "match": ","
+        }
+      ]
+    },
+    "path-components": {
+      "patterns": [
+        { "include": "#comments" },
+        { "include": "#module-parameters" },
+        {
+          "name": "variable.other.alloy",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        },
+        {
+          "name": "punctuation.accessor.alloy",
+          "match": "/"
+        }
+      ]
+    },
+    "module-paths": {
+        "patterns": [
+          {
+            "name": "meta.path.module.alloy",
+            "begin": "\\b(module)\\b",
+            "beginCaptures": {
+              "1": {
+                "name": "storage.type.namespace.alloy"
+              }
+            },
+            "end": "(?=(?:\\s|//[^\\r\\n]*|--[^\\r\\n]*|/\\*[\\s\\S]*?\\*/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|private|abstract|one|lone|some|var)\\b)",
+            "patterns": [
+              { "include": "#path-components" }
+            ]
+          },
+          {
+            "name": "meta.path.open.alloy",
+            "begin": "\\b(open)\\b",
+            "beginCaptures": {
+              "1": {
+                "name": "keyword.control.import.alloy"
+              }
+            },
+            "end": "(?=(?:\\s|//[^\\r\\n]*|--[^\\r\\n]*|/\\*[\\s\\S]*?\\*/)*(?:as\\s+[A-Za-z_][A-Za-z0-9_]*\\s*)?(?:open|sig|enum|pred|fun|fact|assert|run|check|private|abstract|one|lone|some|var)\\b)",
+            "patterns": [
+              { "include": "#comments" },
+              {
+                "name": "keyword.control.import.as.alloy",
+                "match": "\\bas\\b"
+              },
+              { "include": "#path-components" }
+            ]
+          }
+        ]
+    },
+    "sig-declaration": { 
+      "patterns": [ 
+        {
+              "name": "storage.type.alloy",
+              "match": "\\b(sig)\\b(?!\\$)",
+              "captures": {
+                "1": {
+                  "name": "keyword.declaration.type.alloy"
+                }
+              }
+        },
+        {
+          "name": "keyword.other.alloy",
+          "match": "\\b(extends|in)\\b"
+        },
+        {
+          "name": "keyword.operator.expression.alloy",
+          "match": "\\+"
+        },
+        {
+          "name": "keyword.operator.assignment.alloy",
+          "match": "="
+        },
+        {
+          "name": "storage.modifier.alloy",
+          "match": "\\b(abstract|private|var|disj)\\b(?!\\$)"
+        },
+        {
+          "name": "storage.modifier.alloy",
+          "match": "\\b(one|lone|some|set)\\b(?=(?:(?:\\s+)|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*|--[^\\r\\n]*|\\b(?:abstract|private|var|one|lone|some|set)\\b)*\\bsig\\b(?!\\$))"
+        }
+    ]},
+    "meta-identifiers": {
+      "patterns": [
+        {
+          "name": "support.constant.alloy",
+          "match": "\\b(sig|field)\\$(?![A-Za-z0-9_])"
+        },
+        {
+          "name": "support.constant.alloy",
+          "match": "\\b(static|var)\\$(?![A-Za-z0-9_])"
+        },
+        {
+          "name": "variable.other.meta.alloy",
+          "match": "\\b([A-Za-z_][A-Za-z0-9_]*)\\$([A-Za-z_][A-Za-z0-9_]*)\\b",
+          "captures": {
+            "1": {
+              "name": "variable.other.alloy"
+            },
+            "2": {
+              "name": "variable.other.alloy"
+            }
+          }
+        },
+        {
+          "name": "variable.other.alloy",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\$(?![A-Za-z0-9_])"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.alloy",
+          "match": "\\b(for|but|exactly|expect|with)\\b"
+        },
+        {
+          "name": "keyword.other.alloy",
+          "match": "\\b(enabled|event|invariant|modifies)\\b"
+        },
+        {
+          "name": "support.type.alloy",
+          "match": "\\b(Int|String|int|seq|steps)\\b"
+        },
+        {
+          "name": "variable.language.alloy",
+          "match": "\\b(this)\\b"
+        }
+      ]
+    },
+    "groups": {
+      "name": "meta.group.alloy",
+      "begin": "\\(",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.group.begin.alloy"
+        }
+      },
+      "end": "\\)",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.group.end.alloy"
+        }
+      },
+      "patterns": [
+          {
+            "include": "#block-expressions"
+          },
+          {
+            "include": "$self"
+          }
+      ]
+    },
+    "brackets": {
+      "name": "meta.brackets.alloy",
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.begin.alloy"
+        }
+      },
+      "end": "\\]",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.brackets.end.alloy"
+        }
+      },
+      "patterns": [
+          {
+            "include": "#block-expressions"
+          },
+          {
+            "include": "$self"
+          }
+      ]
+    },
+    "blocks": {
+      "name": "meta.block.alloy",
+      "begin": "\\{",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.section.block.begin.alloy"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.section.block.end.alloy"
+        }
+      },
+      "patterns": [
+          {
+            "include": "#block-expressions"
+          },
+          {
+            "include": "$self"
+          }
+      ]
+    },
+    "block-expressions" : {
+      "patterns": [
+    {
+          "name": "storage.modifier.alloy",
+          "match": "(?<=:)\\s*(one|lone|some|set)\\b",
+          "captures": {
+            "1": {
+              "name": "storage.modifier.alloy"
+            }
+          }
+        },
+        {
+          "name": "storage.modifier.alloy",
+          "match": "(?<=->)\\s*(one|lone|some|set)\\b",
+          "captures": {
+            "1": {
+              "name": "storage.modifier.alloy"
+            }
+          }
+        },
+        {
+          "name": "storage.modifier.alloy",
+          "match": "\\b(one|lone|some|set)\\b(?=\\s*->)",
+          "captures": {
+            "1": {
+              "name": "storage.modifier.alloy"
+            }
+          }
+        },
+        {
+          "name": "keyword.control.conditional.alloy",
+          "match": "\\b(else)\\b"
+        },
+        {
+          "name": "keyword.operator.word.alloy",
+          "match": "\\b(and|or|not|implies|iff)\\b"
+        },
+        {
+          "name": "keyword.operator.word.alloy",
+          "match": "\\b(all|no|one|some|lone)\\b"
+        },
+        {
+          "name": "keyword.operator.word.alloy",
+          "match": "\\b(always|eventually|after|before|until|releases|since|triggered|historically|once)\\b"
+        },
+        {
+          "name": "meta.binding.let.alloy",
+          "begin": "\\blet\\b",
+          "beginCaptures": {
+            "0": {
+              "name": "keyword.operator.word.alloy"
+            }
+          },
+          "end": "(?=\\||\\{)",
+          "patterns": [
+            {
+              "name": "keyword.operator.assignment.alloy",
+              "match": "="
+            },
+            {
+              "include": "#block-expressions"
+            }
+          ]
+        },
+        {
+          "name": "keyword.operator.word.alloy",
+          "match": "\\b(in)\\b"
+        },
+        {
+          "name": "keyword.operator.word.alloy",
+          "match": "\\b(sum|int)\\b"
+        },
+        {
+          "name": "storage.modifier.alloy",
+          "match": "\\b(seq)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.alloy",
+          "match": "<=>|=>|!|&&|\\|\\||;"
+        },
+        {
+          "name": "keyword.operator.bitwise.alloy",
+          "match": ">>>|>>|<<"
+        },
+        {
+          "name": "keyword.operator.expression.alloy",
+          "match": "\\+\\+|->|<:|:>|\\+|-|&|\\*|\\^|~|\\.|#|'"
+        },
+        {
+          "name": "keyword.operator.comparison.alloy",
+          "match": "=<|>=|=|<|>"
+        }
+
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+      {
+          "name": "punctuation.separator.alloy",
+          "match": "\\.\\."
+        },
+        {
+          "name": "punctuation.separator.alloy",
+          "match": ",|:(?!>)|(?<!\\|)\\|(?!\\|)"
+        },
+        {
+          "name": "punctuation.definition.variable.alloy",
+          "match": "@"
+        }
+      ]
+    },
+    "constants": {
+      "patterns": [
+        {
+          "name": "constant.numeric.integer.hexadecimal.alloy",
+          "match": "\\b0x(?:_|[0-9A-Fa-f]{2})+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.binary.alloy",
+          "match": "\\b0b[01_]+\\b"
+        },
+        {
+          "name": "constant.numeric.integer.decimal.alloy",
+          "match": "\\b[0-9][0-9_]*\\b"
+        },
+        {
+          "name": "variable.language.alloy",
+          "match": "\\b(univ|iden|none)\\b"
+        }
+      ]
+},
+
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "support.function.alloy",
+          "match": "\\b(add|plus|sub|minus|mul|div|rem|min|max|next|prev|gt|gte|lt|lte|eq|pos|neg|nonpos|nonneg)\\b"
+        },
+        {
+          "name": "variable.other.alloy",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        }
+      ]
+    }
+   
+  },
+  "scopeName": "source.alloy"
+}
