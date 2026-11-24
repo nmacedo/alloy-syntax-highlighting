@@ -1,0 +1,132 @@
+name: Prepare platform releases
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Platform to prepare
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - sublime
+          - vscode
+          - pygments
+          - codemirror
+      publish:
+        description: Push the staged source tree to the platform repository
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Build and stage ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out selected source ref
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check generated highlighters
+        run: python scripts/build.py --check
+
+      - name: Stage standalone platform trees
+        run: python scripts/stage-release.py --target "${{ inputs.target }}" --output "$RUNNER_TEMP/platform-release"
+
+      - name: List staged files for review
+        run: find "$RUNNER_TEMP/platform-release" -type f -print | sort
+
+      - name: Build distributable artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$RUNNER_TEMP/platform-artifacts"
+          mkdir -p "$output"
+          targets=(sublime vscode pygments codemirror)
+          if [[ "${{ inputs.target }}" != "all" ]]; then
+            targets=("${{ inputs.target }}")
+          fi
+          for target in "${targets[@]}"; do
+            source="$RUNNER_TEMP/platform-release/$target"
+            case "$target" in
+              sublime)
+                (cd "$source" && zip -q "$output/Alloy.sublime-package" Alloy.tmLanguage README.md LICENSE)
+                ;;
+              vscode)
+                (cd "$source" && zip -qr "$output/alloy-vscode-source.zip" .)
+                ;;
+              pygments)
+                python -m pip install build
+                python -m build --outdir "$output" "$source"
+                ;;
+              codemirror)
+                npm pack "$source" --pack-destination "$output"
+                ;;
+            esac
+          done
+
+      - name: Upload review artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: alloy-platform-candidates-${{ inputs.target }}
+          path: |
+            ${{ runner.temp }}/platform-release/
+            ${{ runner.temp }}/platform-artifacts/
+          if-no-files-found: error
+
+      - name: Push to platform repositories
+        if: ${{ inputs.publish }}
+        env:
+          RELEASE_REPOS_TOKEN: ${{ secrets.RELEASE_REPOS_TOKEN }}
+          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_REF: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${RELEASE_REPOS_TOKEN:?Configure the RELEASE_REPOS_TOKEN Actions secret before enabling deployment}"
+          declare -A repositories=(
+            [sublime]=nmacedo/alloy-sublime-highlighting
+            [vscode]=nmacedo/alloy-vscode-highlighting
+            [pygments]=nmacedo/alloy-pygments-highlighting
+            [codemirror]=nmacedo/alloy-codemirror-highlighting
+          )
+          targets=(sublime vscode pygments codemirror)
+          if [[ "${{ inputs.target }}" != "all" ]]; then
+            targets=("${{ inputs.target }}")
+          fi
+          for target in "${targets[@]}"; do
+            repo="${repositories[$target]}"
+            checkout="$RUNNER_TEMP/destination-$target"
+            remote="https://x-access-token:${RELEASE_REPOS_TOKEN}@github.com/${repo}.git"
+            mkdir -p "$checkout"
+            git -C "$checkout" init --initial-branch=main
+            git -C "$checkout" remote add origin "$remote"
+            if git ls-remote --exit-code --heads "$remote" main >/dev/null; then
+              git -C "$checkout" fetch origin main
+              git -C "$checkout" reset --hard origin/main
+            fi
+            rsync -a --delete --exclude=.git "$RUNNER_TEMP/platform-release/$target/" "$checkout/"
+            git -C "$checkout" config user.name "github-actions[bot]"
+            git -C "$checkout" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git -C "$checkout" add --all
+            if ! git -C "$checkout" diff --cached --quiet; then
+              git -C "$checkout" commit -m "Update ${target} highlighter from ${SOURCE_REF} (${SOURCE_SHA})"
+              git -C "$checkout" push --set-upstream origin main
+            else
+              echo "$repo is already up to date"
+            fi
+          done

@@ -1,0 +1,18 @@
+{
+  "name": "alloy-grammar-tests",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node tests/test-grammar.cjs",
+    "inspect:textmate": "node tests/test-grammar.cjs --print-scopes",
+    "preview:textmate": "node tests/test-grammar.cjs --preview",
+    "build:codemirror": "python codemirror/build.py",
+    "check:codemirror": "python codemirror/build.py --check",
+    "test:codemirror": "npm --prefix codemirror test",
+    "demo:codemirror": "npm --prefix codemirror run demo"
+  },
+  "devDependencies": {
+    "vscode-oniguruma": "2.0.1",
+    "vscode-textmate": "9.2.0"
+  }
+}

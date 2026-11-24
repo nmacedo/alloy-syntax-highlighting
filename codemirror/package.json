@@ -1,0 +1,35 @@
+{
+  "name": "alloy-codemirror",
+  "version": "0.1.0",
+  "description": "CodeMirror 6 language support for Alloy 6",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nmacedo/alloy-syntax-highlighting.git",
+    "directory": "codemirror"
+  },
+  "homepage": "https://github.com/nmacedo/alloy-syntax-highlighting/tree/main/codemirror",
+  "bugs": {
+    "url": "https://github.com/nmacedo/alloy-syntax-highlighting/issues"
+  },
+  "exports": "./src/alloy.js",
+  "files": [
+    "src/alloy.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "python3 build.py",
+    "test": "node --test test/*.test.js",
+    "demo": "python3 -m http.server 8000 --directory .."
+  },
+  "dependencies": {
+    "@codemirror/language": "^6.10.8",
+    "@codemirror/state": "^6.5.2",
+    "@lezer/highlight": "^1.2.1"
+  },
+  "devDependencies": {
+    "@codemirror/view": "^6.38.6"
+  }
+}

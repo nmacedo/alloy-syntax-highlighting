@@ -1,28 +1,19 @@
+# Alloy syntax highlighting for Sublime Text
 
-# Alloy 6
+Syntax highlighting for Alloy 6 `.als` files using a TextMate grammar.
 
-Syntax highlighting for the Alloy 6 modeling language in Sublime Text.
+## Install
 
-This package is generated from the
-[Alloy Syntax Highlighting](https://github.com/nmacedo/alloy-syntax-highlighting)
-project.
+Place `Alloy.tmLanguage` in a Sublime Text package directory.
 
-## Installation
+## Use
 
-1. Open the Command Palette.
-2. Select `Package Control: Install Package`.
-3. Search for `Alloy 6`.
+Open an `.als` file and select **View → Syntax → Alloy** if Sublime Text does
+not select it automatically.
 
-## Language support
+## Limitations and source
 
-- Alloy 6 syntax highlighting
-- TextMate grammar (`source.alloy`)
-- `.als` files
-
-## Development
-
-The canonical grammar is maintained in the
-[main repository](https://github.com/nmacedo/alloy-syntax-highlighting).
-
-This repository contains generated distribution files.
-Please submit grammar changes to the main repository.
+This provides syntax highlighting, not Alloy Analyzer or semantic language
+services. The canonical grammar and known highlighting limitations are in the
+[Alloy syntax highlighting repository](https://github.com/nmacedo/alloy-syntax-highlighting)
+and its [limitations guide](https://github.com/nmacedo/alloy-syntax-highlighting/blob/main/docs/limitations.md).

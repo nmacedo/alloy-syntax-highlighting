@@ -18,11 +18,19 @@
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#module-paths</string>
+			<string>#module-declarations-and-imports</string>
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#sig-declaration</string>
+			<string>#signature-declarations</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#callable-declaration-parameters</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#top-level-let-declarations</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -38,23 +46,19 @@
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#groups</string>
+			<string>#block-expressions</string>
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#brackets</string>
+			<string>#expression-brackets</string>
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#blocks</string>
+			<string>#expression-blocks</string>
 		</dict>
 		<dict>
 			<key>include</key>
 			<string>#punctuation</string>
-		</dict>
-		<dict>
-			<key>include</key>
-			<string>#operators</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -67,226 +71,13 @@
 	</array>
 	<key>repository</key>
 	<dict>
-		<key>block-expressions</key>
-		<dict>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>storage.modifier.alloy</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>(?&lt;=:)\s*(one|lone|some|set)\b</string>
-					<key>name</key>
-					<string>storage.modifier.alloy</string>
-				</dict>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>storage.modifier.alloy</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>(?&lt;=-&gt;)\s*(one|lone|some|set)\b</string>
-					<key>name</key>
-					<string>storage.modifier.alloy</string>
-				</dict>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>storage.modifier.alloy</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>\b(one|lone|some|set)\b(?=\s*-&gt;)</string>
-					<key>name</key>
-					<string>storage.modifier.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(else)\b</string>
-					<key>name</key>
-					<string>keyword.control.conditional.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(and|or|not|implies|iff)\b</string>
-					<key>name</key>
-					<string>keyword.operator.word.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(all|no|one|some|lone)\b</string>
-					<key>name</key>
-					<string>keyword.operator.word.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(always|eventually|after|before|until|releases|since|triggered|historically|once)\b</string>
-					<key>name</key>
-					<string>keyword.operator.word.alloy</string>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string>\blet\b</string>
-					<key>beginCaptures</key>
-					<dict>
-						<key>0</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.operator.word.alloy</string>
-						</dict>
-					</dict>
-					<key>end</key>
-					<string>(?=\||\{)</string>
-					<key>name</key>
-					<string>meta.binding.let.alloy</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>match</key>
-							<string>=</string>
-							<key>name</key>
-							<string>keyword.operator.assignment.alloy</string>
-						</dict>
-						<dict>
-							<key>include</key>
-							<string>#block-expressions</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(in)\b</string>
-					<key>name</key>
-					<string>keyword.operator.word.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(sum|int)\b</string>
-					<key>name</key>
-					<string>keyword.operator.word.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(seq)\b</string>
-					<key>name</key>
-					<string>storage.modifier.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>&lt;=&gt;|=&gt;|!|&amp;&amp;|\|\||;</string>
-					<key>name</key>
-					<string>keyword.operator.logical.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>&gt;&gt;&gt;|&gt;&gt;|&lt;&lt;</string>
-					<key>name</key>
-					<string>keyword.operator.bitwise.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\+\+|-&gt;|&lt;:|:&gt;|\+|-|&amp;|\*|\^|~|\.|#|'</string>
-					<key>name</key>
-					<string>keyword.operator.expression.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>=&lt;|&gt;=|=|&lt;|&gt;</string>
-					<key>name</key>
-					<string>keyword.operator.comparison.alloy</string>
-				</dict>
-			</array>
-		</dict>
-		<key>blocks</key>
-		<dict>
-			<key>begin</key>
-			<string>\{</string>
-			<key>beginCaptures</key>
-			<dict>
-				<key>0</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.section.block.begin.alloy</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>\}</string>
-			<key>endCaptures</key>
-			<dict>
-				<key>0</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.section.block.end.alloy</string>
-				</dict>
-			</dict>
-			<key>name</key>
-			<string>meta.block.alloy</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>include</key>
-					<string>#block-expressions</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>$self</string>
-				</dict>
-			</array>
-		</dict>
-		<key>brackets</key>
-		<dict>
-			<key>begin</key>
-			<string>\[</string>
-			<key>beginCaptures</key>
-			<dict>
-				<key>0</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.section.brackets.begin.alloy</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>\]</string>
-			<key>endCaptures</key>
-			<dict>
-				<key>0</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.section.brackets.end.alloy</string>
-				</dict>
-			</dict>
-			<key>name</key>
-			<string>meta.brackets.alloy</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>include</key>
-					<string>#block-expressions</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>$self</string>
-				</dict>
-			</array>
-		</dict>
 		<key>comments</key>
 		<dict>
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>name</key>
+					<string>comment.line.double-slash.alloy</string>
 					<key>begin</key>
 					<string>//</string>
 					<key>beginCaptures</key>
@@ -299,10 +90,10 @@
 					</dict>
 					<key>end</key>
 					<string>$</string>
-					<key>name</key>
-					<string>comment.line.double-slash.alloy</string>
 				</dict>
 				<dict>
+					<key>name</key>
+					<string>comment.line.double-dash.alloy</string>
 					<key>begin</key>
 					<string>--</string>
 					<key>beginCaptures</key>
@@ -315,10 +106,10 @@
 					</dict>
 					<key>end</key>
 					<string>$</string>
-					<key>name</key>
-					<string>comment.line.double-dash.alloy</string>
 				</dict>
 				<dict>
+					<key>name</key>
+					<string>comment.block.documentation.alloy</string>
 					<key>begin</key>
 					<string>/\*\*(?!/)</string>
 					<key>beginCaptures</key>
@@ -339,10 +130,10 @@
 							<string>punctuation.definition.comment.alloy</string>
 						</dict>
 					</dict>
-					<key>name</key>
-					<string>comment.block.documentation.alloy</string>
 				</dict>
 				<dict>
+					<key>name</key>
+					<string>comment.block.alloy</string>
 					<key>begin</key>
 					<string>/\*</string>
 					<key>beginCaptures</key>
@@ -363,38 +154,42 @@
 							<string>punctuation.definition.comment.alloy</string>
 						</dict>
 					</dict>
-					<key>name</key>
-					<string>comment.block.alloy</string>
 				</dict>
 			</array>
 		</dict>
-		<key>constants</key>
+		<key>strings</key>
 		<dict>
+			<key>name</key>
+			<string>meta.string.alloy</string>
+			<key>contentName</key>
+			<string>string.quoted.double.alloy</string>
+			<key>begin</key>
+			<string>"</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.string.begin.alloy</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>"</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.string.end.alloy</string>
+				</dict>
+			</dict>
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>match</key>
-					<string>\b0x(?:_|[0-9A-Fa-f]{2})+\b</string>
 					<key>name</key>
-					<string>constant.numeric.integer.hexadecimal.alloy</string>
-				</dict>
-				<dict>
+					<string>constant.character.escape.alloy</string>
 					<key>match</key>
-					<string>\b0b[01_]+\b</string>
-					<key>name</key>
-					<string>constant.numeric.integer.binary.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b[0-9][0-9_]*\b</string>
-					<key>name</key>
-					<string>constant.numeric.integer.decimal.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(univ|iden|none)\b</string>
-					<key>name</key>
-					<string>variable.language.alloy</string>
+					<string>\\.</string>
 				</dict>
 			</array>
 		</dict>
@@ -403,196 +198,279 @@
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.declaration.function.alloy</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>\b(pred|fun|let)\b</string>
 					<key>name</key>
-					<string>storage.type.function.alloy</string>
+					<string>storage.type.function.alloy keyword.declaration.function.alloy</string>
+					<key>match</key>
+					<string>\b(pred|fun)\b</string>
 				</dict>
 				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.declaration.enum.alloy</string>
-						</dict>
-					</dict>
+					<key>name</key>
+					<string>storage.type.enum.alloy keyword.declaration.enum.alloy</string>
 					<key>match</key>
 					<string>\b(enum)\b</string>
-					<key>name</key>
-					<string>storage.type.enum.alloy</string>
 				</dict>
 				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.declaration.namespace.alloy</string>
-						</dict>
-					</dict>
+					<key>name</key>
+					<string>storage.type.namespace.alloy keyword.declaration.namespace.alloy</string>
 					<key>match</key>
 					<string>\b(module)\b</string>
-					<key>name</key>
-					<string>storage.type.namespace.alloy</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>\b(run|check)\b</string>
 					<key>name</key>
 					<string>keyword.declaration.command.alloy</string>
+					<key>match</key>
+					<string>\b(run|check)\b</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>\b(assert)\b</string>
 					<key>name</key>
 					<string>keyword.declaration.assert.alloy</string>
+					<key>match</key>
+					<string>\b(assert)\b</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>\b(fact)\b</string>
 					<key>name</key>
 					<string>keyword.declaration.fact.alloy</string>
+					<key>match</key>
+					<string>\b(fact)\b</string>
 				</dict>
 			</array>
 		</dict>
-		<key>groups</key>
+		<key>top-level-let-declarations</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>begin</key>
+					<string>\blet\b</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>storage.type.function.alloy keyword.declaration.function.alloy</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?&lt;=\})|(?=(?:[ \t]+|/\*[\s\S]*?\*/|//[^\r\n]*|--[^\r\n]*)*(?:(?:private|abstract|one|lone|some|var)\b[ \t]+)*(?:module|open|sig|enum|pred|fun|fact|assert|run|check|let)\b)</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#comments</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#strings</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#top-level-let-header</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#top-level-let-expression-body</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#top-level-let-block-body</string>
+						</dict>
+					</array>
+				</dict>
+			</array>
+		</dict>
+		<key>top-level-let-header</key>
 		<dict>
 			<key>begin</key>
-			<string>\(</string>
+			<string>(?=[A-Za-z_])</string>
+			<key>end</key>
+			<string>(?=(?:\s|//[^\r\n]*|--[^\r\n]*|/\*[\s\S]*?\*/)*(?:=|\{))</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>\[</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.brackets.begin.alloy</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>\]</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.section.brackets.end.alloy</string>
+						</dict>
+					</dict>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#identifier-list-items</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#identifiers</string>
+				</dict>
+			</array>
+		</dict>
+		<key>top-level-let-expression-body</key>
+		<dict>
+			<key>name</key>
+			<string>meta.binding.macro.alloy</string>
+			<key>begin</key>
+			<string>=</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.section.group.begin.alloy</string>
+					<string>keyword.operator.assignment.alloy</string>
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>\)</string>
+			<string>(?=(?:[ \t]+|/\*[\s\S]*?\*/|//[^\r\n]*|--[^\r\n]*)*(?:(?:private|abstract|one|lone|some|var)\b[ \t]+)*(?:module|open|sig|enum|pred|fun|fact|assert|run|check|let)\b)</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#strings</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
+				</dict>
+			</array>
+		</dict>
+		<key>top-level-let-block-body</key>
+		<dict>
+			<key>name</key>
+			<string>meta.binding.macro.alloy</string>
+			<key>begin</key>
+			<string>(?=\{)</string>
+			<key>end</key>
+			<string>(?&lt;=\})</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#strings</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
+				</dict>
+			</array>
+		</dict>
+		<key>callable-declaration-parameters</key>
+		<dict>
+			<key>contentName</key>
+			<string>meta.brackets.alloy meta.parameters.alloy</string>
+			<key>begin</key>
+			<string>\b(fun|pred)\b\s+([A-Za-z_][A-Za-z0-9_]*)\s*(\[)</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>storage.type.function.alloy keyword.declaration.function.alloy</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>variable.other.alloy</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.brackets.begin.alloy</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>\]</string>
 			<key>endCaptures</key>
 			<dict>
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.section.group.end.alloy</string>
+					<string>punctuation.section.brackets.end.alloy</string>
 				</dict>
 			</dict>
-			<key>name</key>
-			<string>meta.group.alloy</string>
 			<key>patterns</key>
 			<array>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#strings</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#callable-parameter-value</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(disj|var)\b(?!\$)</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>punctuation.separator.alloy</string>
+					<key>match</key>
+					<string>,</string>
+				</dict>
 				<dict>
 					<key>include</key>
 					<string>#block-expressions</string>
 				</dict>
+			</array>
+		</dict>
+		<key>identifier-list-items</key>
+		<dict>
+			<key>patterns</key>
+			<array>
 				<dict>
 					<key>include</key>
-					<string>$self</string>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>punctuation.separator.alloy</string>
+					<key>match</key>
+					<string>,</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#identifiers</string>
 				</dict>
 			</array>
 		</dict>
-		<key>identifiers</key>
+		<key>module-path-arguments</key>
 		<dict>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>match</key>
-					<string>\b(add|plus|sub|minus|mul|div|rem|min|max|next|prev|gt|gte|lt|lte|eq|pos|neg|nonpos|nonneg)\b</string>
-					<key>name</key>
-					<string>support.function.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b[A-Za-z_][A-Za-z0-9_]*\b</string>
-					<key>name</key>
-					<string>variable.other.alloy</string>
-				</dict>
-			</array>
-		</dict>
-		<key>keywords</key>
-		<dict>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>match</key>
-					<string>\b(for|but|exactly|expect|with)\b</string>
-					<key>name</key>
-					<string>keyword.control.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(enabled|event|invariant|modifies)\b</string>
-					<key>name</key>
-					<string>keyword.other.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(Int|String|int|seq|steps)\b</string>
-					<key>name</key>
-					<string>support.type.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(this)\b</string>
-					<key>name</key>
-					<string>variable.language.alloy</string>
-				</dict>
-			</array>
-		</dict>
-		<key>meta-identifiers</key>
-		<dict>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>match</key>
-					<string>\b(sig|field)\$(?![A-Za-z0-9_])</string>
-					<key>name</key>
-					<string>support.constant.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(static|var)\$(?![A-Za-z0-9_])</string>
-					<key>name</key>
-					<string>support.constant.alloy</string>
-				</dict>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>variable.other.alloy</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>variable.other.alloy</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>\b([A-Za-z_][A-Za-z0-9_]*)\$([A-Za-z_][A-Za-z0-9_]*)\b</string>
-					<key>name</key>
-					<string>variable.other.meta.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b[A-Za-z_][A-Za-z0-9_]*\$(?![A-Za-z0-9_])</string>
-					<key>name</key>
-					<string>variable.other.alloy</string>
-				</dict>
-			</array>
-		</dict>
-		<key>module-parameters</key>
-		<dict>
+			<key>name</key>
+			<string>meta.parameters.module.alloy</string>
 			<key>begin</key>
 			<string>\[</string>
 			<key>beginCaptures</key>
@@ -613,87 +491,15 @@
 					<string>punctuation.section.brackets.end.alloy</string>
 				</dict>
 			</dict>
-			<key>name</key>
-			<string>meta.parameters.module.alloy</string>
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>match</key>
-					<string>\b[A-Za-z_][A-Za-z0-9_]*\b</string>
-					<key>name</key>
-					<string>variable.other.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>,</string>
-					<key>name</key>
-					<string>punctuation.separator.comma.alloy</string>
+					<key>include</key>
+					<string>#identifier-list-items</string>
 				</dict>
 			</array>
 		</dict>
-		<key>module-paths</key>
-		<dict>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>begin</key>
-					<string>\b(module)\b</string>
-					<key>beginCaptures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>storage.type.namespace.alloy</string>
-						</dict>
-					</dict>
-					<key>end</key>
-					<string>(?=(?:\s|//[^\r\n]*|--[^\r\n]*|/\*[\s\S]*?\*/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|private|abstract|one|lone|some|var)\b)</string>
-					<key>name</key>
-					<string>meta.path.module.alloy</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#path-components</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string>\b(open)\b</string>
-					<key>beginCaptures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.control.import.alloy</string>
-						</dict>
-					</dict>
-					<key>end</key>
-					<string>(?=(?:\s|//[^\r\n]*|--[^\r\n]*|/\*[\s\S]*?\*/)*(?:as\s+[A-Za-z_][A-Za-z0-9_]*\s*)?(?:open|sig|enum|pred|fun|fact|assert|run|check|private|abstract|one|lone|some|var)\b)</string>
-					<key>name</key>
-					<string>meta.path.open.alloy</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#comments</string>
-						</dict>
-						<dict>
-							<key>match</key>
-							<string>\bas\b</string>
-							<key>name</key>
-							<string>keyword.control.import.as.alloy</string>
-						</dict>
-						<dict>
-							<key>include</key>
-							<string>#path-components</string>
-						</dict>
-					</array>
-				</dict>
-			</array>
-		</dict>
-		<key>path-components</key>
+		<key>module-path-components</key>
 		<dict>
 			<key>patterns</key>
 			<array>
@@ -703,19 +509,537 @@
 				</dict>
 				<dict>
 					<key>include</key>
-					<string>#module-parameters</string>
+					<string>#module-path-arguments</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>\b[A-Za-z_][A-Za-z0-9_]*\b</string>
 					<key>name</key>
 					<string>variable.other.alloy</string>
+					<key>match</key>
+					<string>\b[A-Za-z_][A-Za-z0-9_]*\b</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>/</string>
 					<key>name</key>
 					<string>punctuation.accessor.alloy</string>
+					<key>match</key>
+					<string>/</string>
+				</dict>
+			</array>
+		</dict>
+		<key>module-declarations-and-imports</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>meta.path.module.alloy</string>
+					<key>begin</key>
+					<string>\b(module)\b</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>storage.type.namespace.alloy</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?=(?:\s|//[^\r\n]*|--[^\r\n]*|/\*[\s\S]*?\*/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|let|private|abstract|one|lone|some|var)\b)</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#module-path-components</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>meta.path.open.alloy</string>
+					<key>begin</key>
+					<string>\b(open)\b</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.control.import.alloy</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?=(?:\s|//[^\r\n]*|--[^\r\n]*|/\*[\s\S]*?\*/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|let|private|abstract|one|lone|some|var)\b)</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#comments</string>
+						</dict>
+						<dict>
+							<key>name</key>
+							<string>keyword.control.import.as.alloy</string>
+							<key>match</key>
+							<string>\bas\b</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#module-path-components</string>
+						</dict>
+					</array>
+				</dict>
+			</array>
+		</dict>
+		<key>signature-declarations</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(abstract|private|var)\b(?!\$)</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(one|lone|some)\b(?=(?:(?:\s+)|/\*[\s\S]*?\*/|//[^\r\n]*|--[^\r\n]*|\b(?:abstract|private|var|one|lone|some)\b)*\bsig\b(?!\$))</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(?=\bsig\b(?!\$))</string>
+					<key>end</key>
+					<string>(?&lt;=\})</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>name</key>
+							<string>storage.type.alloy keyword.declaration.type.alloy</string>
+							<key>match</key>
+							<string>\b(sig)\b(?!\$)</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#signature-hierarchy</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#signature-fields</string>
+						</dict>
+					</array>
+				</dict>
+			</array>
+		</dict>
+		<key>meta-identifiers</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>support.constant.alloy</string>
+					<key>match</key>
+					<string>\b(sig|field)\$(?![A-Za-z0-9_])</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>support.constant.alloy</string>
+					<key>match</key>
+					<string>\b(static|var)\$(?![A-Za-z0-9_])</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>punctuation.accessor.alloy</string>
+					<key>match</key>
+					<string>\$</string>
+				</dict>
+			</array>
+		</dict>
+		<key>keywords</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>keyword.control.alloy</string>
+					<key>match</key>
+					<string>\b(for|but|exactly|expect|with)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.other.alloy</string>
+					<key>match</key>
+					<string>\b(enabled|event|invariant|modifies)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>support.type.alloy</string>
+					<key>match</key>
+					<string>\b(Int|String|int|seq|steps)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>variable.language.alloy</string>
+					<key>match</key>
+					<string>\b(this)\b</string>
+				</dict>
+			</array>
+		</dict>
+		<key>expression-groups</key>
+		<dict>
+			<key>name</key>
+			<string>meta.group.alloy</string>
+			<key>begin</key>
+			<string>\(</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.group.begin.alloy</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>\)</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.group.end.alloy</string>
+				</dict>
+			</dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
+				</dict>
+			</array>
+		</dict>
+		<key>expression-brackets</key>
+		<dict>
+			<key>name</key>
+			<string>meta.brackets.alloy</string>
+			<key>begin</key>
+			<string>\[</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.brackets.begin.alloy</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>\]</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.brackets.end.alloy</string>
+				</dict>
+			</dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(disj)\b(?!\$)</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
+				</dict>
+			</array>
+		</dict>
+		<key>expression-blocks</key>
+		<dict>
+			<key>name</key>
+			<string>meta.block.alloy</string>
+			<key>begin</key>
+			<string>\{</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.block.begin.alloy</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>\}</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>0</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.section.block.end.alloy</string>
+				</dict>
+			</dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
+				</dict>
+			</array>
+		</dict>
+		<key>block-expressions</key>
+		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#strings</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#expression-groups</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#expression-brackets</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#expression-blocks</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(:)(?!&gt;)|(-&gt;)</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.separator.alloy</string>
+						</dict>
+						<key>2</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.operator.expression.alloy</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>((?:one|lone|some|set)\b)|(?=\S)(?!/\*|//|--)</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>storage.modifier.alloy</string>
+						</dict>
+					</dict>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#comments</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#strings</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>(?&lt;=:)\s*(one|lone|some|set)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>(?&lt;=-&gt;)\s*(one|lone|some|set)\b</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#punctuation</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(disj|var)\b(?!\$)</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(one|lone|some|set)\b(?=(?:(?:\s+)|/\*[\s\S]*?\*/|//[^\r\n]*|--[^\r\n]*)*-&gt;)</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.word.alloy</string>
+					<key>match</key>
+					<string>\b(and|or|not|implies|iff|else)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.word.alloy</string>
+					<key>match</key>
+					<string>\b(all|no|one|some|lone)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.word.alloy</string>
+					<key>match</key>
+					<string>\b(always|eventually|after|before|until|releases|since|triggered|historically|once)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>meta.binding.let.alloy</string>
+					<key>begin</key>
+					<string>\blet\b</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.operator.word.alloy</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?=\|(?!\|)|\{(?!\s*[A-Za-z_][A-Za-z0-9_]*\s*:))</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>name</key>
+							<string>meta.binding.let.alloy</string>
+							<key>begin</key>
+							<string>=</string>
+							<key>beginCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>meta.binding.let.alloy keyword.operator.assignment.alloy</string>
+								</dict>
+							</dict>
+							<key>end</key>
+							<string>(?=\|(?!\|)|\{(?!\s*[A-Za-z_][A-Za-z0-9_]*\s*:))</string>
+							<key>patterns</key>
+							<array>
+								<dict>
+									<key>include</key>
+									<string>#comments</string>
+								</dict>
+								<dict>
+									<key>include</key>
+									<string>#strings</string>
+								</dict>
+								<dict>
+									<key>begin</key>
+									<string>,</string>
+									<key>beginCaptures</key>
+									<dict>
+										<key>0</key>
+										<dict>
+											<key>name</key>
+											<string>punctuation.separator.alloy</string>
+										</dict>
+									</dict>
+									<key>end</key>
+									<string>(=)|(?=\S)(?![A-Za-z_]|/\*|//|--)</string>
+									<key>endCaptures</key>
+									<dict>
+										<key>1</key>
+										<dict>
+											<key>name</key>
+											<string>meta.binding.let.alloy keyword.operator.assignment.alloy</string>
+										</dict>
+									</dict>
+									<key>patterns</key>
+									<array>
+										<dict>
+											<key>include</key>
+											<string>#comments</string>
+										</dict>
+										<dict>
+											<key>include</key>
+											<string>#strings</string>
+										</dict>
+										<dict>
+											<key>include</key>
+											<string>#identifiers</string>
+										</dict>
+									</array>
+								</dict>
+								<dict>
+									<key>include</key>
+									<string>#block-expressions</string>
+								</dict>
+							</array>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#block-expressions</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.word.alloy</string>
+					<key>match</key>
+					<string>\b(in)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.word.alloy</string>
+					<key>match</key>
+					<string>\b(sum|int)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(seq)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.logical.alloy</string>
+					<key>match</key>
+					<string>&lt;=&gt;|=&gt;|!|&amp;&amp;|\|\||;</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.bitwise.alloy</string>
+					<key>match</key>
+					<string>&gt;&gt;&gt;|&gt;&gt;|&lt;&lt;</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.expression.alloy</string>
+					<key>match</key>
+					<string>\+\+|-&gt;|&lt;:|:&gt;|\+|-|&amp;|\*|\^|~|\.|#|'</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.comparison.alloy</string>
+					<key>match</key>
+					<string>=&lt;|&gt;=|=|&lt;|&gt;</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#meta-identifiers</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#keywords</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#identifiers</string>
 				</dict>
 			</array>
 		</dict>
@@ -724,108 +1048,230 @@
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>name</key>
+					<string>punctuation.separator.alloy</string>
 					<key>match</key>
 					<string>\.\.</string>
-					<key>name</key>
-					<string>punctuation.separator.alloy</string>
 				</dict>
 				<dict>
+					<key>name</key>
+					<string>punctuation.separator.alloy</string>
 					<key>match</key>
 					<string>,|:(?!&gt;)|(?&lt;!\|)\|(?!\|)</string>
-					<key>name</key>
-					<string>punctuation.separator.alloy</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>@</string>
 					<key>name</key>
 					<string>punctuation.definition.variable.alloy</string>
+					<key>match</key>
+					<string>@</string>
 				</dict>
 			</array>
 		</dict>
-		<key>sig-declaration</key>
+		<key>constants</key>
 		<dict>
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.declaration.type.alloy</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>\b(sig)\b(?!\$)</string>
 					<key>name</key>
-					<string>storage.type.alloy</string>
+					<string>constant.numeric.integer.hexadecimal.alloy</string>
+					<key>match</key>
+					<string>\b0x(?:_|[0-9A-Fa-f]{2})+\b</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>\b(extends|in)\b</string>
 					<key>name</key>
-					<string>keyword.other.alloy</string>
+					<string>constant.numeric.integer.binary.alloy</string>
+					<key>match</key>
+					<string>\b0b[01_]+\b</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>\+</string>
 					<key>name</key>
-					<string>keyword.operator.expression.alloy</string>
+					<string>constant.numeric.integer.decimal.alloy</string>
+					<key>match</key>
+					<string>\b[0-9][0-9_]*\b</string>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>=</string>
 					<key>name</key>
-					<string>keyword.operator.assignment.alloy</string>
-				</dict>
-				<dict>
+					<string>variable.language.alloy</string>
 					<key>match</key>
-					<string>\b(abstract|private|var|disj)\b(?!\$)</string>
-					<key>name</key>
-					<string>storage.modifier.alloy</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\b(one|lone|some|set)\b(?=(?:(?:\s+)|/\*[\s\S]*?\*/|//[^\r\n]*|--[^\r\n]*|\b(?:abstract|private|var|one|lone|some|set)\b)*\bsig\b(?!\$))</string>
-					<key>name</key>
-					<string>storage.modifier.alloy</string>
+					<string>\b(univ|iden|none)\b</string>
 				</dict>
 			</array>
 		</dict>
-		<key>strings</key>
+		<key>identifiers</key>
 		<dict>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>name</key>
+					<string>variable.other.alloy</string>
+					<key>match</key>
+					<string>\b[A-Za-z_][A-Za-z0-9_]*\b</string>
+				</dict>
+			</array>
+		</dict>
+		<key>signature-hierarchy</key>
+		<dict>
+			<key>name</key>
+			<string>meta.signature.hierarchy.alloy</string>
 			<key>begin</key>
-			<string>"</string>
+			<string>(?&lt;=sig)</string>
+			<key>end</key>
+			<string>(?=\{)</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#strings</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#meta-identifiers</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.other.alloy</string>
+					<key>match</key>
+					<string>\b(extends|in)\b</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.expression.alloy</string>
+					<key>match</key>
+					<string>\+</string>
+				</dict>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.assignment.alloy</string>
+					<key>match</key>
+					<string>=</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#keywords</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#constants</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#identifiers</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#punctuation</string>
+				</dict>
+			</array>
+		</dict>
+		<key>signature-fields</key>
+		<dict>
+			<key>name</key>
+			<string>meta.block.signature.fields.alloy</string>
+			<key>begin</key>
+			<string>\{</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.string.begin.alloy</string>
+					<string>punctuation.section.block.begin.alloy</string>
 				</dict>
 			</dict>
-			<key>contentName</key>
-			<string>string.quoted.double.alloy</string>
 			<key>end</key>
-			<string>"</string>
+			<string>\}</string>
 			<key>endCaptures</key>
 			<dict>
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.string.end.alloy</string>
+					<string>punctuation.section.block.end.alloy</string>
 				</dict>
 			</dict>
-			<key>name</key>
-			<string>meta.string.alloy</string>
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>match</key>
-					<string>\\.</string>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#strings</string>
+				</dict>
+				<dict>
 					<key>name</key>
-					<string>constant.character.escape.alloy</string>
+					<string>storage.modifier.alloy</string>
+					<key>match</key>
+					<string>\b(private|var|disj)\b(?!\$)</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#field-declaration-value</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
+				</dict>
+			</array>
+		</dict>
+		<key>field-declaration-value</key>
+		<dict>
+			<key>name</key>
+			<string>meta.declaration.field-value.alloy</string>
+			<key>begin</key>
+			<string>(:)(?!&gt;)|(=)</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.separator.alloy</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.assignment.alloy</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=,|\})</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
+				</dict>
+			</array>
+		</dict>
+		<key>callable-parameter-value</key>
+		<dict>
+			<key>name</key>
+			<string>meta.declaration.parameter-value.alloy</string>
+			<key>begin</key>
+			<string>(:)(?!&gt;)|(=)</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.separator.alloy</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.operator.assignment.alloy</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=,|\])</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#block-expressions</string>
 				</dict>
 			</array>
 		</dict>

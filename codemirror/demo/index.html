@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alloy CodeMirror smoke test</title>
+    <style>
+      body { margin: 0; font: 14px system-ui, sans-serif; }
+      header { display: flex; align-items: center; gap: 1rem; padding: .75rem 1rem; }
+      #editor { height: calc(100vh - 3.5rem); }
+      .cm-editor { height: 100%; }
+      select { max-width: 24rem; }
+      #status { color: #a33; }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "@codemirror/language": "/codemirror/node_modules/@codemirror/language/dist/index.js",
+          "@codemirror/state": "/codemirror/node_modules/@codemirror/state/dist/index.js",
+          "@codemirror/streamparser": "/codemirror/node_modules/@codemirror/streamparser/dist/index.js",
+          "@codemirror/view": "/codemirror/node_modules/@codemirror/view/dist/index.js",
+          "@lezer/common": "/codemirror/node_modules/@lezer/common/dist/index.js",
+          "@lezer/highlight": "/codemirror/node_modules/@lezer/highlight/dist/index.js",
+          "@lezer/lr": "/codemirror/node_modules/@lezer/lr/dist/index.js",
+          "@marijn/find-cluster-break": "/codemirror/node_modules/@marijn/find-cluster-break/src/index.js",
+          "crelt": "/codemirror/node_modules/crelt/index.js",
+          "style-mod": "/codemirror/node_modules/style-mod/src/style-mod.js",
+          "w3c-keyname": "/codemirror/node_modules/w3c-keyname/index.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <label for="fixture">Fixture</label>
+      <select id="fixture">
+        <option>modules.als</option>
+        <option>declarations.als</option>
+        <option>formulas.als</option>
+        <option>signatures.als</option>
+        <option>commands.als</option>
+        <option>meta.als</option>
+        <option>literals.als</option>
+        <option>comments.als</option>
+      </select>
+      <span id="status" role="status"></span>
+    </header>
+    <main id="editor"></main>
+    <script type="module" src="./demo.js"></script>
+  </body>
+</html>

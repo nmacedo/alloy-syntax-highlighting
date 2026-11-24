@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+node_modules/
+*.egg-info/
+build/
+dist/
+
+# VS Code extension packages
+*.vsix
+*.sublime-package
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

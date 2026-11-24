@@ -1,5 +1,4 @@
-
-name: Build grammars
+name: Build and validate
 
 on:
   push:
@@ -7,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build and validate
+  generated-artifacts:
+    name: Build generated artifacts
     runs-on: ubuntu-latest
 
     steps:
@@ -20,8 +19,20 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Build editor grammars
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install TextMate test dependencies
+        run: npm ci
+
+      - name: Build all generated artifacts
         run: python scripts/build.py
+
+      - name: Check generated artifacts are current
+        run: python scripts/build.py --check
 
       - name: Validate canonical JSON grammar
         run: python -m json.tool grammar/alloy.tmLanguage.json > /dev/null
@@ -32,13 +43,75 @@ jobs:
       - name: Validate generated Sublime plist
         run: python -c "import plistlib; plistlib.load(open('sublime/Alloy.tmLanguage', 'rb'))"
 
-      - name: Check generated files are up to date
+      - name: Check build did not leave generated changes
         run: git diff --exit-code
 
-      - name: Upload generated grammars
-        uses: actions/upload-artifact@v4
+  textmate-tests:
+    name: TextMate scopes (${{ matrix.target }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: canonical
+            grammar: grammar/alloy.tmLanguage.json
+          - target: vscode
+            grammar: vscode/syntaxes/alloy.tmLanguage.json
+          - target: sublime
+            grammar: sublime/Alloy.tmLanguage
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          name: alloy-editor-grammars
-          path: |
-            vscode/syntaxes/alloy.tmLanguage.json
-            sublime/Alloy.tmLanguage
+          node-version: "22"
+          cache: npm
+
+      - name: Install TextMate test dependencies
+        run: npm ci
+
+      - name: Run shared scope assertions
+        run: npm test -- --grammar "${{ matrix.grammar }}"
+
+  pygments-tests:
+    name: Pygments shared fixture tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install package and dependencies
+        run: python -m pip install .
+
+      - name: Run Pygments adapter tests
+        run: python -m unittest discover -s pygments/tests -p 'test_pygments.py' -v
+
+  codemirror-tests:
+    name: CodeMirror shared fixture tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: codemirror/package-lock.json
+
+      - name: Install CodeMirror dependencies
+        run: npm ci --prefix codemirror
+
+      - name: Run CodeMirror adapter tests
+        run: npm --prefix codemirror test

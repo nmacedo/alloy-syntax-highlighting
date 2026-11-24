@@ -1,92 +1,102 @@
-# Alloy Language Support
+# Alloy syntax highlighting
 
-Syntax highlighting for the Alloy 6 modeling language.
+Syntax highlighting for Alloy 6 across VS Code, Sublime Text, Pygments, and
+CodeMirror 6. The canonical, hand-maintained grammar is
+[`grammar/alloy.tmLanguage.json`](./grammar/alloy.tmLanguage.json); platform
+artifacts are generated from it.
 
-This repository provides editor support for:
+## Targets
 
-- Visual Studio Code
-- Sublime Text
+| Target | Generated artifact | Guide |
+|---|---|---|
+| VS Code | `vscode/syntaxes/alloy.tmLanguage.json` | [Overview and installation](./vscode/README.md) |
+| Sublime Text | `sublime/Alloy.tmLanguage` | [Overview and installation](./sublime/README.md) |
+| Pygments | `pygments/alloy_pygments/lexer.py` | [Install, use, and test](./pygments/README.md) |
+| CodeMirror 6 | `codemirror/src/alloy.js` | [Use](./codemirror/README.md) |
 
-The canonical grammar is a TextMate JSON grammar. Editor-specific
-files are generated from that source.
+Generated artifacts should not be edited by hand. Builders require Python 3.10
+or later.
 
-## Repository structure
+## Contributor quick start
 
-    grammar/
-      alloy.tmLanguage.json
+Install the TextMate test dependencies and check that all generated artifacts
+match the canonical grammar:
 
-    editors/
-      vscode/
-        package.json
-        syntaxes/
-          alloy.tmLanguage.json
+```sh
+npm ci
+python3 scripts/build.py --check
+```
 
-      sublime/
-        Alloy.tmLanguage
+Run the shared scope assertions against the canonical oracle grammar:
 
-    scripts/
-      build.py
-      build-vscode.py
-      build-sublime.py
+```sh
+npm test -- --grammar grammar/alloy.tmLanguage.json
+```
 
-## Building
+Run those same scope assertions against the two generated TextMate grammars:
 
-Requirements: Python 3.8 or later.
+```sh
+npm test -- --grammar vscode/syntaxes/alloy.tmLanguage.json
+npm test -- --grammar sublime/Alloy.tmLanguage
+```
 
-From the repository root, run:
+Run the generated Pygments and CodeMirror suites against the shared fixture
+expectations:
 
-    python scripts/build.py
+```sh
+python3 -m pip install -e .
+python3 -m unittest discover -s pygments/tests -p 'test_pygments.py' -v
+npm --prefix codemirror ci
+npm --prefix codemirror test
+```
 
-This generates:
+These are the validation entry points for all four generated artifacts. The
+Pygments and CodeMirror suites adapt the shared TextMate expectations to their
+own token models. Their known mismatches are recorded in
+[`docs/limitations.md`](./docs/limitations.md).
 
-- `editors/vscode/syntaxes/alloy.tmLanguage.json`
-- `editors/sublime/Alloy.tmLanguage`
+The shared fixture corpus, scope expectations, target suite commands, and
+terminal previews are documented in the [testing guide](./tests/README.md).
 
-Do not edit these generated files directly. Make changes to
-`grammar/alloy.tmLanguage.json` and rebuild.
+## Local previews
 
-## Visual Studio Code
+Each preview below uses a generated artifact. For the TextMate targets, the
+preview prints each distinct lexical scope in its own terminal color and
+includes a scope legend.
 
-Build the grammar first:
+**VS Code TextMate grammar:**
 
-    python scripts/build.py
+```sh
+npm run preview:textmate -- --grammar vscode/syntaxes/alloy.tmLanguage.json --file tests/fixtures/declarations.als
+```
 
-Then package the extension:
+**Sublime Text TextMate grammar:**
 
-    cd editors/vscode
-    npx @vscode/vsce package
+```sh
+npm run preview:textmate -- --grammar sublime/Alloy.tmLanguage --file tests/fixtures/declarations.als
+```
 
-This produces a `.vsix` file that can be installed in VS Code.
+**Pygments lexer:** after `python3 -m pip install -e .`:
 
-To install it from the command line:
+```sh
+pygmentize -l alloy6 -f terminal256 tests/fixtures/declarations.als
+```
 
-    code --install-extension alloy-language-0.1.0.vsix
+**CodeMirror 6:**
 
-## Sublime Text
+```sh
+npm run demo:codemirror
+```
 
-Build the grammar first:
+Then open `http://localhost:8000/codemirror/demo/` and select a fixture. The
+target guides and [testing guide](./tests/README.md) have further setup and
+inspection details.
 
-    python scripts/build.py
+## Change workflow
 
-To try it locally, copy `editors/sublime/Alloy.tmLanguage` into
-your Sublime Text Packages directory.
-
-You can find that directory through:
-
-    Preferences → Browse Packages...
-
-For distribution, the Sublime grammar can be packaged separately
-as a Sublime Text package.
-
-## Contributing
-
-Please make grammar changes in:
-
-    grammar/alloy.tmLanguage.json
-
-After changing the grammar, run:
-
-    python scripts/build.py
-
-Check that the generated files are up to date before submitting
-a pull request.
+Edit the canonical grammar, rebuild generated targets with
+`python3 scripts/build.py`, then run the relevant suites. Platform-specific
+build, installation, use, and smoke-test instructions live in each target
+guide above. Publishing has not started. The manual GitHub Actions workflow
+can prepare candidate payloads and, when explicitly enabled, update the
+platform repositories.

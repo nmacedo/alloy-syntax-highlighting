@@ -1,0 +1,37 @@
+name: Prepare Sublime package candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Build Sublime package candidate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Generate Sublime grammar
+        run: python sublime/build.py
+
+      - name: Assemble Sublime package candidate
+        run: |
+          mkdir -p "$RUNNER_TEMP/alloy-sublime-package"
+          cp sublime/Alloy.tmLanguage sublime/README.md LICENSE "$RUNNER_TEMP/alloy-sublime-package/"
+          cd "$RUNNER_TEMP/alloy-sublime-package"
+          zip -q Alloy.sublime-package Alloy.tmLanguage README.md LICENSE
+
+      - name: Upload package candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: alloy-sublime-package-candidate
+          path: ${{ runner.temp }}/alloy-sublime-package/Alloy.sublime-package
