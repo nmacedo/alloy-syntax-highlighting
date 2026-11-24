@@ -4,6 +4,12 @@ This page records limitations demonstrated by the current fixtures and
 generated-artifact suites. It does not attempt to list every Alloy construct
 that a regex-based highlighter might handle imperfectly. 
 
+The suite keeps the expected scopes as the desired results. The current,
+narrowly scoped mismatches are recorded in
+[`known-failures.json`](../tests/expected/known-failures.json): runners report
+them as `XFAIL`, fail on unlisted mismatches, and fail with `XPASS` when a known
+case starts passing so its entry can be removed.
+
 ## Canonical TextMate grammar
 
 ### Top-level `let` macro bodies

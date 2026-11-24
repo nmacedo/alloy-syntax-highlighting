@@ -13,6 +13,14 @@ from alloy_pygments.lexer import AlloyLexer  # noqa: E402
 
 FIXTURES = ROOT / "tests" / "fixtures"
 EXPECTED = ROOT / "tests" / "expected" / "scopes.json"
+KNOWN_FAILURES = ROOT / "tests" / "expected" / "known-failures.json"
+
+
+def failure_key(item):
+    return json.dumps([
+        item["fixture"], item["line"], item["token"],
+        item.get("occurrence", 0), item["kind"], item["scope"]
+    ])
 
 
 def scope_token(scope: str):
@@ -92,6 +100,39 @@ class PygmentsFixtureTests(unittest.TestCase):
         checked = 0
         negative_checked = 0
         intentionally_unrepresentable = 0
+        xfailed = 0
+        known = json.loads(KNOWN_FAILURES.read_text(encoding="utf-8"))["pygments"]
+        known_by_key = {failure_key(item): item for item in known}
+        seen_known = set()
+
+        def record_result(filename, assertion, kind, scope, passed, observed):
+            nonlocal xfailed
+            entry = {
+                "fixture": filename,
+                "line": assertion["line"],
+                "token": assertion["token"],
+                "occurrence": assertion.get("occurrence", 0),
+                "kind": kind,
+                "scope": scope,
+            }
+            key = failure_key(entry)
+            known_failure = known_by_key.get(key)
+            label = f"{filename}:{entry['line']} {entry['token']!r} {kind} {scope}"
+            if known_failure:
+                seen_known.add(key)
+                if passed:
+                    failures.append(f"XPASS {label}: remove the stale known-failure entry")
+                elif observed != known_failure["observed"]:
+                    failures.append(
+                        f"Known failure changed for {label}: expected observed "
+                        f"{known_failure['observed']}, got {observed}"
+                    )
+                else:
+                    xfailed += 1
+                    print(f"XFAIL {label} [{known_failure['reason']}]")
+            elif not passed:
+                failures.append(f"{label}: got {observed}")
+
         for filename, assertions in self.expected.items():
             source = (FIXTURES / filename).read_text(encoding="utf-8")
             lines = source.splitlines(keepends=True)
@@ -132,13 +173,11 @@ class PygmentsFixtureTests(unittest.TestCase):
                             # TextMate's string scope encloses escape scopes;
                             # Pygments exposes the escape as a separate token.
                             allowed += (Token.Literal.String.Escape,)
-                        if any(not any(token in category for category in allowed)
-                               for _, _, token, _ in overlapping):
-                            got = [(str(token), value) for _, _, token, value in overlapping]
-                            failures.append(
-                                f"{filename}:{line_number}: {assertion['token']!r}: "
-                                f"expected {wanted}, got {got} (source scope {expected_scope})"
-                            )
+                        passed = all(any(token in category for category in allowed)
+                                     for _, _, token, _ in overlapping)
+                        observed = ", ".join(sorted({str(token) for _, _, token, _ in overlapping}))
+                        record_result(filename, assertion, "scope", expected_scope,
+                                      passed, observed)
 
                 for forbidden_scope in assertion.get("notScopes", []):
                     forbidden = scope_token(forbidden_scope)
@@ -146,18 +185,25 @@ class PygmentsFixtureTests(unittest.TestCase):
                     # such as group-open vs block-open into Punctuation.
                     if forbidden is not None and forbidden not in (Token.Punctuation,):
                         negative_checked += 1
-                        if any(token in forbidden for _, _, token, _ in overlapping):
-                            failures.append(
-                                f"{filename}:{line_number}: {assertion['token']!r}: unexpectedly mapped to "
-                                f"{forbidden} (forbidden source scope {forbidden_scope})"
-                            )
+                        passed = not any(token in forbidden for _, _, token, _ in overlapping)
+                        observed = ", ".join(sorted({str(token) for _, _, token, _ in overlapping}))
+                        record_result(filename, assertion, "notScope", forbidden_scope,
+                                      passed, observed)
+
+        for known_failure in known:
+            key = failure_key(known_failure)
+            if key not in seen_known:
+                failures.append(
+                    f"Stale known-failure entry: {known_failure['fixture']}:{known_failure['line']} "
+                    f"{known_failure['token']!r} {known_failure['kind']} {known_failure['scope']}"
+                )
 
         self.assertFalse("\n".join(failures), "Pygments fixture mismatches:\n" + "\n".join(failures))
         print(
             f"\nPygments checked {checked} representable positive assertions and "
             f"{negative_checked} representable negative assertions; "
             f"skipped {intentionally_unrepresentable} positive meta-scope assertions "
-            "and unrepresentable negative scopes."
+            f"and unrepresentable negative scopes; observed {xfailed} known failures."
         )
 
 

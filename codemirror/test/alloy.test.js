@@ -11,6 +11,18 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "../..");
 const FIXTURES = path.join(ROOT, "tests", "fixtures");
 const EXPECTED = path.join(ROOT, "tests", "expected", "scopes.json");
+const KNOWN_FAILURES = path.join(ROOT, "tests", "expected", "known-failures.json");
+
+function failureKey(item) {
+  return JSON.stringify([
+    item.fixture,
+    item.line,
+    item.token,
+    item.occurrence || 0,
+    item.kind,
+    item.scope
+  ]);
+}
 
 function styleForScope(scope) {
   if (!scope) return null;
@@ -61,9 +73,42 @@ function tokenize(source) {
 
 test("all fixture scope assertions map to CodeMirror tags", () => {
   const expected = JSON.parse(fs.readFileSync(EXPECTED, "utf8"));
+  const known = JSON.parse(fs.readFileSync(KNOWN_FAILURES, "utf8")).codemirror;
+  const knownByKey = new Map(known.map(item => [failureKey(item), item]));
+  const seenKnown = new Set();
   let checked = 0;
   let intentionallyUnstyled = 0;
+  let xfailed = 0;
   const failures = [];
+
+  function recordResult(filename, assertion, kind, scope, passed, observed) {
+    const entry = {
+      fixture: filename,
+      line: assertion.line,
+      token: assertion.token,
+      occurrence: assertion.occurrence || 0,
+      kind,
+      scope
+    };
+    const key = failureKey(entry);
+    const knownFailure = knownByKey.get(key);
+    const label = `${filename}:${entry.line} ${JSON.stringify(entry.token)} ${kind} ${scope}`;
+    if (knownFailure) {
+      seenKnown.add(key);
+      if (passed) {
+        failures.push(`XPASS ${label}: remove the stale known-failure entry`);
+      } else if (observed !== knownFailure.observed) {
+        failures.push(
+          `Known failure changed for ${label}: expected observed ${knownFailure.observed}, got ${observed}`
+        );
+      } else {
+        xfailed += 1;
+        console.log(`XFAIL ${label} [${knownFailure.reason}]`);
+      }
+    } else if (!passed) {
+      failures.push(`${label}: got ${observed}`);
+    }
+  }
 
   for (const [filename, assertions] of Object.entries(expected)) {
     const fixturePath = path.join(FIXTURES, filename);
@@ -93,23 +138,36 @@ test("all fixture scope assertions map to CodeMirror tags", () => {
       if (assertion.scope && wanted == null) intentionallyUnstyled++;
       if (wanted != null) {
         checked++;
-        if (overlapping.some(token => token.style !== wanted)) {
-          failures.push(`${filename}:${lineNumber}: ${JSON.stringify(assertion.token)} expected ${wanted}, got ${JSON.stringify(overlapping)}`);
-        }
+        const passed = overlapping.every(token => token.style === wanted);
+        const observed = [...new Set(overlapping.map(token => token.style || "(unstyled)"))].join(", ");
+        recordResult(filename, assertion, "scope", assertion.scope, passed, observed);
       }
       for (const forbiddenScope of assertion.notScopes || []) {
         const forbidden = styleForScope(forbiddenScope);
         // StreamLanguage uses one shared punctuation tag for all TextMate
         // delimiter sub-scopes, so those negative distinctions are not testable.
         if (forbidden && forbidden !== "punctuation" && overlapping.some(token => token.style === forbidden)) {
-          failures.push(`${filename}:${lineNumber}: ${JSON.stringify(assertion.token)} unexpectedly styled ${forbidden} (${forbiddenScope})`);
+          const observed = [...new Set(overlapping.map(token => token.style || "(unstyled)"))].join(", ");
+          recordResult(filename, assertion, "notScope", forbiddenScope, false, observed);
+        } else if (forbidden && forbidden !== "punctuation") {
+          const observed = [...new Set(overlapping.map(token => token.style || "(unstyled)"))].join(", ");
+          recordResult(filename, assertion, "notScope", forbiddenScope, true, observed);
         }
       }
     }
   }
 
+  for (const knownFailure of known) {
+    if (!seenKnown.has(failureKey(knownFailure))) {
+      failures.push(
+        `Stale known-failure entry: ${knownFailure.fixture}:${knownFailure.line} ` +
+        `${JSON.stringify(knownFailure.token)} ${knownFailure.kind} ${knownFailure.scope}`
+      );
+    }
+  }
+
   assert.deepEqual(failures, [], failures.join("\n"));
-  console.log(`Checked ${checked} mapped scope assertions; ${intentionallyUnstyled} meta-scope assertions intentionally have no visual tag.`);
+  console.log(`Checked ${checked} mapped scope assertions; ${intentionallyUnstyled} meta-scope assertions intentionally have no visual tag; observed ${xfailed} known failures.`);
 });
 
 test("indentation follows Alloy block and grouping delimiters", () => {

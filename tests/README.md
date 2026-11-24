@@ -74,6 +74,15 @@ form is in `commands.als`. Their scopes intentionally differ:
 for the built-in command scope name. The expected scopes are recorded in
 [`expected/scopes.json`](./expected/scopes.json).
 
+## Known failures
+
+`expected/known-failures.json` lists the current known mismatches for TextMate,
+Pygments, and CodeMirror. The runners report each listed mismatch as `XFAIL`.
+Every unlisted mismatch still fails the suite. A listed case that starts
+passing is reported as `XPASS` and fails the suite until its allowlist entry is
+removed. The expected scopes remain the desired results; the allowlist records
+current behavior separately.
+
 Each fixture has entries in `expected/scopes.json`. The CodeMirror demo offers
 the same eight fixtures in its picker.
 

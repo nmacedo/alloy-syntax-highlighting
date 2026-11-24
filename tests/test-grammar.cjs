@@ -11,6 +11,7 @@ const vscodeOniguruma = require("vscode-oniguruma");
 const ROOT = path.resolve(__dirname, "..");
 const FIXTURES = path.join(__dirname, "fixtures");
 const EXPECTED = path.join(__dirname, "expected", "scopes.json");
+const KNOWN_FAILURES = path.join(__dirname, "expected", "known-failures.json");
 const GRAMMAR_CANDIDATES = [
   path.join(ROOT, "vscode", "syntaxes", "alloy.tmLanguage.json"),
   path.join(ROOT, "grammar", "alloy.tmLanguage.json")
@@ -151,6 +152,17 @@ function lexicalScope(scopes) {
   ) || "(unscoped)";
 }
 
+function failureKey(failure) {
+  return JSON.stringify([
+    failure.fixture,
+    failure.line,
+    failure.token,
+    failure.occurrence || 0,
+    failure.kind,
+    failure.scope
+  ]);
+}
+
 function scopeColorMap(lines) {
   const scopes = [...new Set(lines.flatMap(line =>
     line.tokens.map(token => lexicalScope(token.scopes))
@@ -216,7 +228,41 @@ async function main() {
     fixtureExpectations = [[fixtureName, expectations[fixtureName]]];
   }
   let passed = 0;
+  let xfailed = 0;
   const failures = [];
+  const known = JSON.parse(fs.readFileSync(KNOWN_FAILURES, "utf8")).textmate;
+  const selectedFixtures = new Set(fixtureExpectations.map(([name]) => name));
+  const knownByKey = new Map(known.map(item => [failureKey(item), item]));
+  const seenKnown = new Set();
+
+  function recordResult(fixtureName, check, kind, scope, succeeded, actual) {
+    const entry = {
+      fixture: fixtureName,
+      line: check.line,
+      token: check.token,
+      occurrence: check.occurrence || 0,
+      kind,
+      scope
+    };
+    const knownFailure = knownByKey.get(failureKey(entry));
+    const label = `${fixtureName}:${check.line} ${JSON.stringify(check.token)} ` +
+      `${kind} ${scope}`;
+    if (knownFailure) {
+      seenKnown.add(failureKey(entry));
+      if (succeeded) {
+        failures.push(`XPASS ${label} — remove the stale known-failure entry`);
+      } else if (actual !== knownFailure.observed) {
+        failures.push(`Known failure changed for ${label} — expected observed ${knownFailure.observed}; got ${actual}`);
+      } else {
+        xfailed += 1;
+        console.log(`XFAIL ${label} [${knownFailure.reason}]`);
+      }
+    } else if (succeeded) {
+      passed += 1;
+    } else {
+      failures.push(`${label} — got ${actual}`);
+    }
+  }
 
   for (const [fixtureName, assertions] of fixtureExpectations) {
     const fixturePath = path.join(FIXTURES, fixtureName);
@@ -230,29 +276,31 @@ async function main() {
       const actual = scopesAt(line, column);
 
       if (check.scope) {
-        if (hasScope(actual, check.scope)) {
-          passed += 1;
-        } else {
-          failures.push(`${fixtureName}:${check.line} ${JSON.stringify(check.token)} — expected ${check.scope}; got ${actual.join(" ") || "(none)"}`);
-        }
+        recordResult(fixtureName, check, "scope", check.scope,
+          hasScope(actual, check.scope), lexicalScope(actual));
       }
 
       for (const unwanted of check.notScopes || []) {
-        if (!hasScope(actual, unwanted)) {
-          passed += 1;
-        } else {
-          failures.push(`${fixtureName}:${check.line} ${JSON.stringify(check.token)} — unexpectedly had ${unwanted}; got ${actual.join(" ")}`);
-        }
+        recordResult(fixtureName, check, "notScope", unwanted,
+          !hasScope(actual, unwanted), lexicalScope(actual));
       }
+    }
+  }
+
+  for (const knownFailure of known) {
+    const key = failureKey(knownFailure);
+    if (selectedFixtures.has(knownFailure.fixture) && !seenKnown.has(key)) {
+      failures.push(`Stale known-failure entry: ${knownFailure.fixture}:${knownFailure.line} ` +
+        `${JSON.stringify(knownFailure.token)} ${knownFailure.kind} ${knownFailure.scope}`);
     }
   }
 
   if (failures.length) {
     console.error(`${failures.length} assertion(s) failed:\n${failures.map(x => `  ✗ ${x}`).join("\n")}`);
-    console.error(`\n${passed} assertion(s) passed.`);
+    console.error(`\n${passed} assertion(s) passed; ${xfailed} known failure(s) observed.`);
     process.exitCode = 1;
   } else {
-    console.log(`Alloy grammar tests: ${passed} scope assertions passed.`);
+    console.log(`Alloy grammar tests: ${passed} scope assertions passed; ${xfailed} known failure(s) observed.`);
   }
 }
 
