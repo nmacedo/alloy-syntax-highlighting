@@ -4,10 +4,26 @@
 from __future__ import annotations
 
 import argparse
+import json
+import re
 import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+VERSION_FILE = ROOT / "VERSION"
+
+
+def release_version() -> str:
+    version = VERSION_FILE.read_text(encoding="utf-8").strip()
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError(f"VERSION must contain a semantic version like 1.0.0, got {version!r}")
+    return version
+
+
+def set_manifest_version(path: Path, version: str) -> None:
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["version"] = version
+    path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 
 def copy_files(destination: Path, *sources: str) -> None:
@@ -23,20 +39,22 @@ def copy_files(destination: Path, *sources: str) -> None:
 
 
 def stage(target: str, destination: Path) -> None:
+    version = release_version()
     if destination.exists():
         shutil.rmtree(destination)
     destination.mkdir(parents=True, exist_ok=True)
     if target == "sublime":
-        copy_files(destination, "sublime/Alloy.tmLanguage", "sublime/README.md", "LICENSE")
+        copy_files(destination, "sublime/Alloy.tmLanguage", "sublime/README.md", "LICENSE", "VERSION")
     elif target == "vscode":
         copy_files(destination, "vscode/package.json", "vscode/README.md",
-                   "vscode/LICENSE", "vscode/.vscodeignore", "vscode/syntaxes")
+                   "vscode/LICENSE", "vscode/.vscodeignore", "vscode/syntaxes", "VERSION")
+        set_manifest_version(destination / "package.json", version)
     elif target == "pygments":
-        copy_files(destination, "pygments/alloy_pygments", "pygments/README.md", "LICENSE")
+        copy_files(destination, "pygments/alloy_pygments", "pygments/README.md", "LICENSE", "VERSION")
         (destination / "pyproject.toml").write_text(
             "[build-system]\nrequires = [\"setuptools>=77\"]\n"
             "build-backend = \"setuptools.build_meta\"\n\n"
-            "[project]\nname = \"alloy-pygments\"\nversion = \"0.1.0\"\n"
+            f"[project]\nname = \"alloy-pygments\"\nversion = \"{version}\"\n"
             "description = \"Pygments lexer for Alloy 6\"\nreadme = \"README.md\"\n"
             "license = \"MIT\"\nlicense-files = [\"LICENSE\"]\n"
             "requires-python = \">=3.9\"\ndependencies = [\"Pygments>=2.17\"]\n"
@@ -49,7 +67,8 @@ def stage(target: str, destination: Path) -> None:
         )
     elif target == "codemirror":
         copy_files(destination, "codemirror/package.json", "codemirror/README.md",
-                   "codemirror/LICENSE", "codemirror/src")
+                   "codemirror/LICENSE", "codemirror/src", "VERSION")
+        set_manifest_version(destination / "package.json", version)
     else:
         raise ValueError(f"Unknown target: {target}")
 

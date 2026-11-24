@@ -9,6 +9,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+VERSION = ROOT / "VERSION"
+PACKAGE = ROOT / "codemirror" / "package.json"
+PACKAGE_LOCK = ROOT / "codemirror" / "package-lock.json"
 GRAMMAR = ROOT / "grammar" / "alloy.tmLanguage.json"
 OUTPUT = ROOT / "codemirror" / "src" / "alloy.js"
 LICENSE_SOURCE = ROOT / "LICENSE"
@@ -171,6 +174,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="check generated CodeMirror module freshness")
     args = parser.parse_args()
+    version = VERSION.read_text(encoding="utf-8").strip()
+    package = json.loads(PACKAGE.read_text(encoding="utf-8"))
+    package_lock = json.loads(PACKAGE_LOCK.read_text(encoding="utf-8"))
     grammar = json.loads(GRAMMAR.read_text(encoding="utf-8"))
     repository = grammar["repository"]
 
@@ -358,11 +364,22 @@ def main() -> int:
         if not LICENSE_OUTPUT.is_file() or LICENSE_OUTPUT.read_bytes() != LICENSE_SOURCE.read_bytes():
             print("CodeMirror LICENSE is out of date; run python codemirror/build.py", file=sys.stderr)
             return 1
+        if package.get("version") != version or package_lock.get("version") != version or package_lock.get("packages", {}).get("", {}).get("version") != version:
+            print("CodeMirror package versions do not match VERSION; run python codemirror/build.py", file=sys.stderr)
+            return 1
         print("CodeMirror module is up to date.")
         return 0
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(generated, encoding="utf-8")
     LICENSE_OUTPUT.write_bytes(LICENSE_SOURCE.read_bytes())
+    if package.get("version") != version:
+        package["version"] = version
+        PACKAGE.write_text(json.dumps(package, indent=2) + "\n", encoding="utf-8")
+    if (package_lock.get("version") != version
+            or package_lock.get("packages", {}).get("", {}).get("version") != version):
+        package_lock["version"] = version
+        package_lock["packages"][""]["version"] = version
+        PACKAGE_LOCK.write_text(json.dumps(package_lock, indent=2) + "\n", encoding="utf-8")
     print(f"Built {OUTPUT.relative_to(ROOT)} from {GRAMMAR.relative_to(ROOT)}.")
     return 0
 

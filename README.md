@@ -1,18 +1,19 @@
 # Alloy syntax highlighting
 
 Syntax highlighting for Alloy 6 across VS Code, Sublime Text, Pygments, and
-CodeMirror 6. The canonical, hand-maintained grammar is
+CodeMirror 6. The configured release version is `1.0.0`; the shared release
+tag is `v1.0.0`. The canonical, hand-maintained grammar is
 [`grammar/alloy.tmLanguage.json`](./grammar/alloy.tmLanguage.json); platform
 artifacts are generated from it.
 
 ## Targets
 
-| Target | Generated artifact | Guide |
-|---|---|---|
-| VS Code | `vscode/syntaxes/alloy.tmLanguage.json` | [Overview and installation](./vscode/README.md) |
-| Sublime Text | `sublime/Alloy.tmLanguage` | [Overview and installation](./sublime/README.md) |
-| Pygments | `pygments/alloy_pygments/lexer.py` | [Install, use, and test](./pygments/README.md) |
-| CodeMirror 6 | `codemirror/src/alloy.js` | [Use](./codemirror/README.md) |
+| Platform | Integration | Generated artifact | Guide |
+|---|---|---|---|
+| VS Code | TextMate extension for Alloy `.als` files | `vscode/syntaxes/alloy.tmLanguage.json` | [VS Code guide](./vscode/README.md) |
+| Sublime Text | TextMate grammar for Alloy `.als` files | `sublime/Alloy.tmLanguage` | [Sublime Text guide](./sublime/README.md) |
+| Pygments | Python lexer for Alloy source | `pygments/alloy_pygments/lexer.py` | [Pygments guide](./pygments/README.md) |
+| CodeMirror 6 | `StreamLanguage` support for Alloy source | `codemirror/src/alloy.js` | [CodeMirror guide](./codemirror/README.md) |
 
 Generated artifacts should not be edited by hand. Builders require Python 3.10
 or later.
@@ -96,7 +97,7 @@ inspection details.
 
 Edit the canonical grammar, rebuild generated targets with
 `python3 scripts/build.py`, then run the relevant suites. Platform-specific
-build, installation, use, and smoke-test instructions live in each target
-guide above. Publishing has not started. The manual GitHub Actions workflow
-can prepare candidate payloads and, when explicitly enabled, update the
-platform repositories.
+build, test, and preview commands live in each platform guide above. The
+manual GitHub Actions workflow builds candidate artifacts and updates the four
+platform repositories with the shared version tag. Registry and marketplace
+publication use separate processes.

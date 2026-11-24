@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "alloy-pygments"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Pygments lexer for Alloy 6"
 readme = "pygments/README.md"
 license = "MIT"
@@ -24,6 +24,9 @@ Issues = "https://github.com/nmacedo/alloy-syntax-highlighting/issues"
 
 [tool.setuptools]
 package-dir = {"" = "pygments"}
+
+[tool.setuptools.dynamic]
+version = {file = ["VERSION"]}
 
 [tool.setuptools.packages.find]
 where = ["pygments"]
