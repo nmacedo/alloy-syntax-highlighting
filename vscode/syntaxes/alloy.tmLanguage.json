@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Alloy",
+  "comment": "Declaration contexts resolve overloaded tokens before expression fallbacks. Root expressions cover function return types without guessing their boundaries. See docs/limitations.md.",
   "patterns": [
     {
       "include": "#comments"
@@ -15,7 +16,7 @@
       "include": "#signature-declarations"
     },
     {
-      "include": "#callable-declaration-parameters"
+      "include": "#callable-declarations"
     },
     {
       "include": "#top-level-let-declarations"
@@ -154,8 +155,10 @@
       ]
     },
     "top-level-let-declarations": {
+      "comment": "Top-level macros have optional untyped parameters and either = or brace bodies.",
       "patterns": [
         {
+          "comment": "End after a brace body or before the next declaration. This conservative boundary misidentifies inner let-expressions in undelimited = bodies.",
           "begin": "\\blet\\b",
           "beginCaptures": {
             "0": {
@@ -184,6 +187,7 @@
       ]
     },
     "top-level-let-header": {
+      "comment": "Read the name and optional untyped parameters; leave = or { for the body rule.",
       "begin": "(?=[A-Za-z_])",
       "end": "(?=(?:\\s|//[^\\r\\n]*|--[^\\r\\n]*|/\\*[\\s\\S]*?\\*/)*(?:=|\\{))",
       "patterns": [
@@ -215,6 +219,7 @@
       ]
     },
     "top-level-let-expression-body": {
+      "comment": "The opening = is assignment; RHS signs are comparisons. Yielding to declaration keywords also prematurely ends the scope at inner let-expressions.",
       "name": "meta.binding.macro.alloy",
       "begin": "=",
       "beginCaptures": {
@@ -236,6 +241,7 @@
       ]
     },
     "top-level-let-block-body": {
+      "comment": "expression-blocks consumes the balanced brace body before this wrapper ends.",
       "name": "meta.binding.macro.alloy",
       "begin": "(?=\\{)",
       "end": "(?<=\\})",
@@ -251,17 +257,33 @@
         }
       ]
     },
-    "callable-declaration-parameters": {
-      "contentName": "meta.brackets.alloy meta.parameters.alloy",
-      "begin": "\\b(fun|pred)\\b\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(\\[)",
+    "callable-declarations": {
+      "comment": "Carry the header across comments and line breaks. A nested parameter list owns its delimiters; leave the return-type : or body { to root expression rules.",
+      "begin": "\\b(fun|pred)\\b",
       "beginCaptures": {
-        "1": {
+        "0": {
           "name": "storage.type.function.alloy keyword.declaration.function.alloy"
+        }
+      },
+      "end": "(?=[:{])",
+      "patterns": [
+        {
+          "include": "#comments"
         },
-        "2": {
-          "name": "variable.other.alloy"
+        {
+          "include": "#callable-declaration-parameters"
         },
-        "3": {
+        {
+          "include": "#identifiers"
+        }
+      ]
+    },
+    "callable-declaration-parameters": {
+      "comment": "Parameter lists are optional. Enter at [ within a callable header; nested expression brackets shield inner ] tokens.",
+      "contentName": "meta.brackets.alloy meta.parameters.alloy",
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": {
           "name": "punctuation.section.brackets.begin.alloy"
         }
       },
@@ -295,6 +317,7 @@
       ]
     },
     "identifier-list-items": {
+      "comment": "Untyped identifiers shared by module arguments and macro parameters.",
       "patterns": [
         {
           "include": "#comments"
@@ -347,6 +370,7 @@
       ]
     },
     "module-declarations-and-imports": {
+      "comment": "Paths lack a terminator; the next declaration keyword or modifier is a conservative boundary, not a complete path parse.",
       "patterns": [
         {
           "name": "meta.path.module.alloy",
@@ -394,10 +418,12 @@
           "match": "\\b(abstract|private|var)\\b(?!\\$)"
         },
         {
+          "comment": "Treat multiplicities as modifiers when sig follows on this line, allowing comments and other modifiers. Exclude sig$.",
           "name": "storage.modifier.alloy",
           "match": "\\b(one|lone|some)\\b(?=(?:(?:\\s+)|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*|--[^\\r\\n]*|\\b(?:abstract|private|var|one|lone|some)\\b)*\\bsig\\b(?!\\$))"
         },
         {
+          "comment": "Keep hierarchy and fields together. Nested contexts shield inner braces; a following signature fact block is handled at the root.",
           "begin": "(?=\\bsig\\b(?!\\$))",
           "end": "(?<=\\})",
           "patterns": [
@@ -416,6 +442,7 @@
       ]
     },
     "meta-identifiers": {
+      "comment": "Recognize $-suffixed meta-identifiers before keyword and identifier fallbacks.",
       "patterns": [
         {
           "name": "support.constant.alloy",
@@ -442,6 +469,7 @@
           "match": "\\b(enabled|event|invariant|modifies)\\b"
         },
         {
+          "comment": "Built-in signature/scope names; earlier expression rules override int and seq within expression contexts.",
           "name": "support.type.alloy",
           "match": "\\b(Int|String|int|seq|steps)\\b"
         },
@@ -452,6 +480,7 @@
       ]
     },
     "expression-groups": {
+      "comment": "Recursive delimiters shield nested tokens from enclosing declaration boundaries.",
       "name": "meta.group.alloy",
       "begin": "\\(",
       "beginCaptures": {
@@ -472,6 +501,7 @@
       ]
     },
     "expression-brackets": {
+      "comment": "Nested ] tokens belong to this context, not the enclosing parameter list.",
       "name": "meta.brackets.alloy",
       "begin": "\\[",
       "beginCaptures": {
@@ -496,6 +526,7 @@
       ]
     },
     "expression-blocks": {
+      "comment": "Balance braces for formulas, expressions, and comprehensions without parsing their structure.",
       "name": "meta.block.alloy",
       "begin": "\\{",
       "beginCaptures": {
@@ -516,6 +547,7 @@
       ]
     },
     "block-expressions": {
+      "comment": "Order matters: multiplicity modifiers before word operators, punctuation before overlapping operators, and int/seq expression roles before built-in names. No precedence parsing.",
       "patterns": [
         {
           "include": "#comments"
@@ -533,6 +565,7 @@
           "include": "#expression-blocks"
         },
         {
+          "comment": "After : or ->, wait across whitespace/comments for an optional multiplicity modifier; otherwise return without consuming the next token. Preserve :>.",
           "begin": "(:)(?!>)|(->)",
           "beginCaptures": {
             "1": {
@@ -558,10 +591,12 @@
           ]
         },
         {
+          "comment": "Same-line fallback when the declaration rule already consumed :.",
           "name": "storage.modifier.alloy",
           "match": "(?<=:)\\s*(one|lone|some|set)\\b"
         },
         {
+          "comment": "Same-line fallback after an already-consumed arrow.",
           "name": "storage.modifier.alloy",
           "match": "(?<=->)\\s*(one|lone|some|set)\\b"
         },
@@ -573,6 +608,7 @@
           "match": "\\b(disj|var)\\b(?!\\$)"
         },
         {
+          "comment": "Modifier only if -> follows on this line. An arrow on a later line cannot be detected.",
           "name": "storage.modifier.alloy",
           "match": "\\b(one|lone|some|set)\\b(?=(?:(?:\\s+)|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*|--[^\\r\\n]*)*->)"
         },
@@ -589,6 +625,7 @@
           "match": "\\b(always|eventually|after|before|until|releases|since|triggered|historically|once)\\b"
         },
         {
+          "comment": "Expression bindings end before a single | or a body brace. The brace lookahead excludes only simple name: comprehensions.",
           "name": "meta.binding.let.alloy",
           "begin": "\\blet\\b",
           "beginCaptures": {
@@ -599,6 +636,7 @@
           "end": "(?=\\|(?!\\|)|\\{(?!\\s*[A-Za-z_][A-Za-z0-9_]*\\s*:))",
           "patterns": [
             {
+              "comment": "Consume the binding = as assignment; RHS signs are comparisons. Leave the body delimiter unconsumed.",
               "name": "meta.binding.let.alloy",
               "begin": "=",
               "beginCaptures": {
@@ -615,6 +653,7 @@
                   "include": "#strings"
                 },
                 {
+                  "comment": "A top-level comma starts another binding. Consume its = as assignment, or yield if no binding follows.",
                   "begin": ",",
                   "beginCaptures": {
                     "0": {
@@ -654,14 +693,17 @@
           "match": "\\b(in)\\b"
         },
         {
+          "comment": "Expression operators; precede the int command-scope fallback.",
           "name": "keyword.operator.word.alloy",
           "match": "\\b(sum|int)\\b"
         },
         {
+          "comment": "Type-constructor modifier, distinct from the seq command-scope name.",
           "name": "storage.modifier.alloy",
           "match": "\\b(seq)\\b"
         },
         {
+          "comment": "; is a temporal logical operator, not punctuation.",
           "name": "keyword.operator.logical.alloy",
           "match": "<=>|=>|!|&&|\\|\\||;"
         },
@@ -694,10 +736,12 @@
     "punctuation": {
       "patterns": [
         {
+          "comment": "Match command ranges .. before the join operator .",
           "name": "punctuation.separator.alloy",
           "match": "\\.\\."
         },
         {
+          "comment": "Preserve :> and || as operators; match only the single binder |.",
           "name": "punctuation.separator.alloy",
           "match": ",|:(?!>)|(?<!\\|)\\|(?!\\|)"
         },
@@ -736,6 +780,7 @@
       ]
     },
     "signature-hierarchy": {
+      "comment": "Keep the hierarchy after sig until {, across lines. Here = is assignment and in/extends are hierarchy keywords.",
       "name": "meta.signature.hierarchy.alloy",
       "begin": "(?<=sig)",
       "end": "(?=\\{)",
@@ -776,6 +821,7 @@
       ]
     },
     "signature-fields": {
+      "comment": "Field declarations precede expression fallbacks; nested contexts shield their own closing braces.",
       "name": "meta.block.signature.fields.alloy",
       "begin": "\\{",
       "beginCaptures": {
@@ -809,13 +855,11 @@
       ]
     },
     "field-declaration-value": {
+      "comment": "Leave : to expression rules, which retain an optional multiplicity across comments and lines; consume assignment = here. End at an unnested comma or }.",
       "name": "meta.declaration.field-value.alloy",
-      "begin": "(:)(?!>)|(=)",
+      "begin": "(?=:(?!>))|(=)",
       "beginCaptures": {
         "1": {
-          "name": "punctuation.separator.alloy"
-        },
-        "2": {
           "name": "keyword.operator.assignment.alloy"
         }
       },
@@ -827,13 +871,11 @@
       ]
     },
     "callable-parameter-value": {
+      "comment": "As for field values, leave : to expression rules and consume assignment = here. End at an unnested comma or ].",
       "name": "meta.declaration.parameter-value.alloy",
-      "begin": "(:)(?!>)|(=)",
+      "begin": "(?=:(?!>))|(=)",
       "beginCaptures": {
         "1": {
-          "name": "punctuation.separator.alloy"
-        },
-        "2": {
           "name": "keyword.operator.assignment.alloy"
         }
       },

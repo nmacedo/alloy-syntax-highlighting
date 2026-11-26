@@ -18,30 +18,37 @@ LICENSE_SOURCE = ROOT / "LICENSE"
 LICENSE_OUTPUT = ROOT / "codemirror" / "LICENSE"
 
 RUNTIME = r'''// Generated from grammar/alloy.tmLanguage.json by codemirror/build.py.
-// This is a CodeMirror rule table, not an embedded TextMate grammar.
+// Ordered scanners follow the grammar's repository groups. Shared streaming
+// mechanics (context stack, lookbehind history, and captures) follow below.
 import {StreamLanguage} from "@codemirror/language";
 import {tags} from "@lezer/highlight";
 
 const NO_MATCH = Symbol("no match");
 const RESTART = Symbol("restart after context entry");
 function scanNothing() { return NO_MATCH; }
+
+// Grammar-derived scanners. Rule order is significant. Regex flags: `y`
+// anchors a match at the current position; `d` supplies capture boundaries.
 __SCANNERS__
 
-function tagFor(style) {
-  return style && tokenTable[style] ? style : null;
-}
-
+// Streaming support. A frame stores its ending pattern and body scanner.
+// NO_MATCH tries the next rule; RESTART rescans after a zero-width begin.
 function startState() {
-  return {contexts: [], pending: [], delimiterDepth: 0, history: "", zeroRule: null, zeroPosition: -1};
+  return {
+    contexts: [], pending: [], delimiterDepth: 0, history: "",
+    zeroRule: null, zeroPosition: -1,
+  };
 }
 
 function copyState(state) {
-  return {contexts: state.contexts.slice(), pending: state.pending.slice(), delimiterDepth: state.delimiterDepth, history: state.history, zeroRule: state.zeroRule, zeroPosition: state.zeroPosition};
+  // Frames and pending pieces are immutable; only the arrays need copying.
+  return {...state, contexts: state.contexts.slice(), pending: state.pending.slice()};
 }
 
-function matchAt(pattern, stream, state) {
-  const expression = new RegExp(pattern, "dy");
-  if (!pattern.includes("(?<=")) {
+function matchAt(expression, stream, state) {
+  // Reset lastIndex on every call, including regexes shared by copied frames.
+  // Recent text supplies lookbehind context across CodeMirror's line streams.
+  if (!expression.source.includes("(?<=")) {
     expression.lastIndex = stream.pos;
     return expression.exec(stream.string);
   }
@@ -54,15 +61,33 @@ function matchAt(pattern, stream, state) {
   return match;
 }
 
-function queueMatch(state, match, captures, fallbackScope) {
+function enterContext(stream, state, rule) {
+  // A zero-width begin may be retried after its context ends without consuming
+  // text. Suppress that one rule until the stream makes progress.
+  if (state.zeroRule === rule.id && state.zeroPosition === stream.pos) return NO_MATCH;
+  const match = matchAt(rule.begin, stream, state);
+  if (!match) return NO_MATCH;
+  if (!match[0].length) {
+    state.zeroRule = rule.id;
+    state.zeroPosition = stream.pos;
+  }
+  state.contexts.push({...rule, openingStream: stream, openingPosition: stream.pos});
+  const style = rule.beginStyle ?? rule.delimiterStyle ?? rule.style ?? null;
+  return match[0].length
+    ? emitMatch(stream, state, match, style, rule.beginCaptures)
+    : RESTART;
+}
+
+function emitMatch(stream, state, match, style = null, captures = null) {
+  // Most rules style the entire match. Only mixed captures need a queue:
+  // StreamLanguage can return just one style from each token() call.
+  if (!captures) return consume(stream, state, match[0], style);
   const text = match[0];
-  const indices = match.indices || [];
   const ranges = [];
   const boundaries = new Set([0, text.length]);
-  for (const [index, capture] of Object.entries(captures || {})) {
-    const span = indices[Number(index)];
-    const tag = tagFor(capture);
-    if (!span || !tag) continue;
+  for (const [index, tag] of Object.entries(captures)) {
+    const span = match.indices[Number(index)];
+    if (!span) continue;
     const from = span[0] - match.index;
     const to = span[1] - match.index;
     ranges.push({from, to, tag});
@@ -72,44 +97,45 @@ function queueMatch(state, match, captures, fallbackScope) {
   const points = [...boundaries].sort((a, b) => a - b);
   for (let i = 0; i < points.length - 1; i++) {
     const from = points[i], to = points[i + 1];
-    let tag = tagFor(fallbackScope);
+    let tag = style;
     for (const range of ranges) {
       if (range.from <= from && range.to >= to) tag = range.tag;
     }
-    state.pending.push({length: to - from, tag, text: text.slice(from, to)});
+    state.pending.push({tag, text: text.slice(from, to)});
   }
-}
-
-function emitMatch(stream, state, match, captures, style) {
-  queueMatch(state, match, captures, style);
   return state.pending.length ? emitPending(stream, state) : null;
 }
 
 function emitPending(stream, state) {
   const part = state.pending.shift();
-  stream.pos += part.length;
-  state.history = (state.history + part.text).replace(/\s+/g, " ").slice(-64);
+  return consume(stream, state, part.text, part.tag);
+}
+
+function consume(stream, state, text, style) {
+  stream.pos += text.length;
+  state.history = (state.history + text).replace(/\s+/g, " ").slice(-64);
   state.zeroRule = null;
   state.zeroPosition = -1;
-  if (part.tag === "punctuation") {
-    if (/^[([{]$/.test(part.text)) state.delimiterDepth++;
-    else if (/^[)\]}]$/.test(part.text)) state.delimiterDepth = Math.max(0, state.delimiterDepth - 1);
+  if (style === "punctuation") {
+    if (/^[([{]$/.test(text)) state.delimiterDepth++;
+    else if (/^[)\]}]$/.test(text)) state.delimiterDepth = Math.max(0, state.delimiterDepth - 1);
   }
-  return part.tag;
+  return style;
 }
 
 function token(stream, state) {
   if (state.pending.length) return emitPending(stream, state);
-  while (state.contexts.length && state.contexts.at(-1).end === "$" && stream !== state.contexts.at(-1).openingStream) {
+  // Line comments must also end when CodeMirror skips a blank line.
+  while (state.contexts.length && state.contexts.at(-1).end.source === "$" && stream !== state.contexts.at(-1).openingStream) {
     state.contexts.pop();
   }
   const spaceContext = state.contexts.at(-1);
   if (stream.eatSpace()) {
     state.history = (state.history + stream.current()).replace(/\s+/g, " ").slice(-64);
-    return tagFor(spaceContext?.contentStyle || spaceContext?.style);
+    return spaceContext?.contentStyle || spaceContext?.style || null;
   }
 
-  while (state.contexts.length && state.contexts.at(-1).end === "(?<=\\})"
+  while (state.contexts.length && state.contexts.at(-1).end.source === "(?<=\\})"
          && (stream !== state.contexts.at(-1).openingStream || stream.pos !== state.contexts.at(-1).openingPosition)
          && state.history.trimEnd().endsWith("}")) {
     state.contexts.pop();
@@ -120,8 +146,8 @@ function token(stream, state) {
     if (ending) {
       state.contexts.pop();
       if (ending[0].length) {
-        queueMatch(state, ending, context.endCaptures, context.style);
-        return emitPending(stream, state);
+        const style = context.endStyle ?? context.delimiterStyle ?? context.style ?? null;
+        return emitMatch(stream, state, ending, style, context.endCaptures);
       }
       return token(stream, state);
     }
@@ -134,7 +160,7 @@ function token(stream, state) {
   if (stream.eol()) return null;
   stream.next();
   state.history = (state.history + stream.current()).replace(/\s+/g, " ").slice(-64);
-  return tagFor(context?.contentStyle || context?.style);
+  return context?.contentStyle || context?.style || null;
 }
 
 function indent(state, textAfter, context) {
@@ -206,16 +232,17 @@ def main() -> int:
     def combine_adjacent_matches(patterns: list[dict]) -> list[dict]:
         """Join adjacent same-style leaf matches without changing rule order."""
         combined: list[dict] = []
+        alternatives: list[str] = []
         for rule in patterns:
             if ("match" in rule and rule.get("style") and not rule.get("captures")
                     and combined and combined[-1].get("style") == rule["style"]
                     and "match" in combined[-1] and not combined[-1].get("captures")):
                 previous = combined[-1]
-                alternatives = previous.setdefault("_alternatives", [previous["match"]])
                 alternatives.append(rule["match"])
                 previous["match"] = "|".join(f"(?:{pattern})" for pattern in alternatives)
             else:
                 combined.append(rule)
+                alternatives = [rule["match"]] if "match" in rule else []
         return combined
 
     def captures_for(captures: dict) -> dict:
@@ -259,17 +286,6 @@ def main() -> int:
     rules = [compiled for rule in grammar["patterns"] if (compiled := compile_rule(rule))]
     compiled_repository = {key: compiled for key, value in repository.items()
                            if (compiled := compile_rule(value))}
-    def without_build_metadata(value):
-        if isinstance(value, list):
-            return [without_build_metadata(item) for item in value]
-        if isinstance(value, dict):
-            return {key: without_build_metadata(item) for key, item in value.items()
-                    if key != "_alternatives"}
-        return value
-
-    rules = without_build_metadata(rules)
-    compiled_repository = without_build_metadata(compiled_repository)
-
     def identifier(name: str) -> str:
         parts = re.findall(r"[A-Za-z0-9]+", name.replace("$", "self"))
         return "scan" + "".join(part.title() for part in parts)
@@ -281,7 +297,7 @@ def main() -> int:
     rule_keys: dict[int, str] = {}
     rule_number = 0
 
-    def scanner_for_context(rule: dict) -> str:
+    def scanner_for_context(rule: dict, owner: str) -> str:
         nonlocal rule_number
         key = id(rule)
         if key not in inline_scanners:
@@ -290,48 +306,93 @@ def main() -> int:
             if not rule.get("patterns"):
                 inline_scanners[key] = "scanNothing"
                 return "scanNothing"
-            label = rule.get("contextName", "context").replace(".alloy", "")
-            base = identifier(label)
+            patterns = rule["patterns"]
+            if len(patterns) == 1 and "include" in patterns[0]:
+                target = patterns[0]["include"].removeprefix("#")
+                inline_scanners[key] = scanner_names[target]
+                return inline_scanners[key]
+            # Anonymous grammar contexts inherit their owner's name rather
+            # than becoming anonymous scanContext7 / scanContext8 functions.
+            label = rule.get("contextName")
+            base = identifier(label.replace(".alloy", "")) if label else owner + "Body"
             used = set(inline_scanners.values()) | set(scanner_names.values())
             inline_scanners[key] = base if base not in used else f"{base}{rule_number}"
             generated_scanners[inline_scanners[key]] = emit_scanner(
                 inline_scanners[key], rule.get("patterns", []))
         return inline_scanners[key]
 
-    def emit_rule(rule: dict) -> str:
+    def regex_literal(pattern: str) -> str:
+        """Keep regex syntax visible instead of escaping it as a JS string."""
+        pattern = re.sub(r"(\\*)/", lambda m: m[1] + (r"\/" if len(m[1]) % 2 == 0 else "/"), pattern)
+        for char, escaped in (("\n", r"\n"), ("\r", r"\r"), ("\u2028", r"\u2028"), ("\u2029", r"\u2029")):
+            pattern = pattern.replace(char, escaped)
+        return f"/{pattern}/dy"
+
+    def match_styles(rule: dict, capture_key: str) -> tuple[str | None, dict]:
+        captures = dict(rule.get(capture_key, {}))
+        # A capture for group zero simply supplies the whole-match style.
+        style = captures.pop("0", rule.get("style"))
+        if all(value == style for value in captures.values()):
+            captures = {}
+        return style, captures
+
+    def emit_rule(rule: dict, owner: str, terminal: bool = False) -> str:
         if "include" in rule:
             target = rule["include"][1:] if rule["include"] != "$self" else "$self"
             function = scanner_names.get(target)
             if not function:
                 raise ValueError(f"Unsupported TextMate include: {rule['include']}")
+            if terminal:
+                return f"return {function}(stream, state);"
             return f"if ((result = {function}(stream, state)) !== NO_MATCH) return result;"
         if "match" in rule:
-            return (f"if ((m = matchAt({json.dumps(rule['match'])}, stream, state))) "
-                    f"return emitMatch(stream, state, m, {json.dumps(rule.get('captures', {}))}, "
-                    f"{json.dumps(rule.get('style'))});")
+            style, captures = match_styles(rule, "captures")
+            extra = f", {json.dumps(captures)}" if captures else ""
+            return (f"if ((match = matchAt({regex_literal(rule['match'])}, stream, state)))\n"
+                    f"  return emitMatch(stream, state, match, {json.dumps(style)}{extra});")
         if "begin" in rule:
-            nonlocal_key = rule_keys.get(id(rule))
-            if nonlocal_key is None:
-                scanner_for_context(rule)
-                nonlocal_key = rule_keys[id(rule)]
-            child = scanner_for_context(rule)
-            return "\n".join([
-                f"if (state.zeroRule !== {json.dumps(nonlocal_key)} || state.zeroPosition !== stream.pos) {{",
-                f"  if ((m = matchAt({json.dumps(rule['begin'])}, stream, state))) {{",
-                f"    if (!m[0].length) {{ state.zeroRule = {json.dumps(nonlocal_key)}; state.zeroPosition = stream.pos; }}",
-                f"    state.contexts.push({{end: {json.dumps(rule['end'])}, endCaptures: {json.dumps(rule.get('endCaptures', {}))}, style: {json.dumps(rule.get('style'))}, contentStyle: {json.dumps(rule.get('contentStyle'))}, scan: {child}, openingStream: stream, openingPosition: stream.pos}});",
-                f"    return m[0].length ? emitMatch(stream, state, m, {json.dumps(rule.get('beginCaptures', {}))}, {json.dumps(rule.get('style'))}) : RESTART;",
-                "  }", "}"])
+            child = scanner_for_context(rule, owner)
+            properties = [
+                f"id: {json.dumps(rule_keys[id(rule)])}",
+                f"begin: {regex_literal(rule['begin'])}, end: {regex_literal(rule['end'])}",
+                f"scan: {child}",
+            ]
+            for key in ("style", "contentStyle"):
+                if rule.get(key):
+                    properties.append(f"{key}: {json.dumps(rule[key])}")
+            begin_style, begin_captures = match_styles(rule, "beginCaptures")
+            end_style, end_captures = match_styles(rule, "endCaptures")
+            if begin_style == end_style and begin_style != rule.get("style"):
+                properties.append(f"delimiterStyle: {json.dumps(begin_style)}")
+            for prefix, style, captures in (("begin", begin_style, begin_captures),
+                                            ("end", end_style, end_captures)):
+                if begin_style != end_style and style != rule.get("style"):
+                    properties.append(f"{prefix}Style: {json.dumps(style)}")
+                if captures:
+                    properties.append(f"{prefix}Captures: {json.dumps(captures)}")
+            opening = "return enterContext(stream, state, {" if terminal else "if ((result = enterContext(stream, state, {"
+            closing = "});" if terminal else "})) !== NO_MATCH) return result;"
+            return (opening + "\n  "
+                    + ",\n  ".join(properties)
+                    + ",\n" + closing)
         return ""
 
     def emit_scanner(name: str, patterns: list[dict]) -> str:
+        terminal = len(patterns) == 1 and bool(patterns[0].get("begin") or patterns[0].get("include"))
         body = []
         for rule in patterns:
-            if rule.get("include"):
-                body.append(emit_rule(rule))
-            elif rule.get("match") or rule.get("begin"):
-                body.append(emit_rule(rule))
-        return f"function {name}(stream, state) {{\n  let m, result;\n  " + "\n  ".join(body) + "\n  return NO_MATCH;\n}"
+            if rule.get("include") or rule.get("match") or rule.get("begin"):
+                body.append(emit_rule(rule, name, terminal))
+        variables = []
+        if any("match = " in line for line in body):
+            variables.append("match")
+        if any("result = " in line for line in body):
+            variables.append("result")
+        declaration = f"  let {', '.join(variables)};\n" if variables else ""
+        statements = "\n".join(body).splitlines()
+        return (f"function {name}(stream, state) {{\n" + declaration
+                + "\n".join("  " + line for line in statements)
+                + ("\n}" if terminal else "\n  return NO_MATCH;\n}"))
 
     # Generate one readable function per TextMate repository group. Context
     # rules get their own child function and push that function on the stack.

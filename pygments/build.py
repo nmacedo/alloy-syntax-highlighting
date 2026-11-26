@@ -2,6 +2,7 @@
 """Compile this repository's TextMate grammar into a native Pygments RegexLexer."""
 from __future__ import annotations
 
+import ast
 import json
 import re
 import argparse
@@ -77,11 +78,24 @@ class Compiler:
         self.grammar = grammar
         self.repository = grammar.get("repository", {})
         self.states: dict[str, list[str]] = {}
+        self.pushed_states: set[str] = set()
         self.context_index = 0
         self.context_names: dict[str, int] = {}
 
     @staticmethod
     def q(value: str) -> str:
+        return repr(value)
+
+    @staticmethod
+    def regex(value: str) -> str:
+        """Prefer raw strings so the generated regexes can be read directly."""
+        for quote in ("'", '"'):
+            literal = f"r{quote}{value}{quote}"
+            try:
+                if ast.literal_eval(literal) == value:
+                    return literal
+            except (SyntaxError, ValueError):
+                pass
         return repr(value)
 
     def token_expr(self, scope: str | None, default: str = "Text") -> str:
@@ -90,8 +104,8 @@ class Compiler:
         mapped = scope_token(scope)
         return mapped or default
 
-    def capture_action(self, regex: str, captures: dict | None, base_scope: str | None) -> str:
-        """Create a direct token or a callback preserving partial captures."""
+    def capture_action(self, regex: str, captures: dict | None, base_scope: str | None) -> tuple[str, str]:
+        """Use native bygroups, explicitly capturing this grammar's gaps."""
         captures = captures or {}
         try:
             group_count = re.compile(regex).groups
@@ -110,9 +124,62 @@ class Compiler:
             overrides[index] = self.token_expr(value.get("name"))
 
         if not group_count or not overrides:
-            return base
-        pairs = ", ".join(f"{i}: {token}" for i, token in sorted(overrides.items()))
-        return f"_capture_groups({base}, {{{pairs}}})"
+            return regex, base
+        return self.capture_groups(regex, overrides, base)
+
+    @staticmethod
+    def capture_groups(regex: str, overrides: dict[int, str], base: str) -> tuple[str, str]:
+        """Lower disjoint captures, assertions, and whitespace to bygroups.
+
+        These are the only mixed-capture forms in the Alloy grammar. Reject
+        other consuming gaps or nested captures rather than silently losing
+        source text through Pygments' bygroups callback.
+        """
+        parts, actions = [], []
+        index, group = 0, 0
+        while index < len(regex):
+            if regex[index] == "(":
+                end, depth, in_class = index + 1, 1, False
+                while end < len(regex) and depth:
+                    char = regex[end]
+                    if char == "\\":
+                        end += 2
+                        continue
+                    if char == "[":
+                        in_class = True
+                    elif char == "]":
+                        in_class = False
+                    elif not in_class:
+                        if char == "(":
+                            depth += 1
+                        elif char == ")":
+                            depth -= 1
+                    end += 1
+                part = regex[index:end]
+                groups = re.compile(part).groups
+                if not part.startswith("(?") and groups == 1:
+                    group += 1
+                    actions.append(overrides.get(group, base))
+                elif part.startswith(("(?=", "(?!", "(?<=", "(?<!")) and groups == 0:
+                    pass
+                else:
+                    raise ValueError(f"Unsupported mixed-capture group: {part!r}")
+                parts.append(part)
+                index = end
+            elif regex.startswith(r"\s", index):
+                gap = re.match(r"\\s[+*?]?\??", regex[index:])[0]
+                parts.append(f"({gap})")
+                actions.append(base)
+                index += len(gap)
+            elif regex.startswith((r"\b", r"\B"), index):
+                parts.append(regex[index:index + 2])
+                index += 2
+            elif regex[index] in "^$|":
+                parts.append(regex[index])
+                index += 1
+            else:
+                raise ValueError(f"Uncaptured consuming text in mixed-capture regex: {regex!r}")
+        return "".join(parts), f"bygroups({', '.join(actions)})"
 
     def context_state_name(self, pattern: dict) -> str:
         """Name a pushed state after its TextMate scope when one is available."""
@@ -138,11 +205,11 @@ class Compiler:
                 r"\(": "group",
                 r"\{": "block",
                 "=": "assignment",
-                ",": "comma",
+                ",": "additional_let_binding",
             }
             label = known_begins.get(begin, "")
             if not label and begin.startswith("(:)"):
-                label = "type_operator"
+                label = "multiplicity_after_separator"
             if not label and begin.startswith("(?="):
                 if r"\bsig\b" in begin:
                     label = "signature"
@@ -155,7 +222,7 @@ class Compiler:
             self.context_index += 1
             label = f"rule_{self.context_index}"
 
-        base = f"context_{re.sub(r'[^A-Za-z0-9_]', '_', label)}"
+        base = re.sub(r'[^A-Za-z0-9_]', '_', label)
         count = self.context_names.get(base, 0) + 1
         self.context_names[base] = count
         return base if count == 1 else f"{base}_{count}"
@@ -167,6 +234,7 @@ class Compiler:
         if body in self.states:
             raise ValueError(f"Duplicate generated state {body!r}")
         self.states[body] = []
+        self.pushed_states.add(body)
 
         end = pattern["end"]
         context_name = pattern.get("name", "")
@@ -179,12 +247,10 @@ class Compiler:
         elif content_token and content_token.startswith("String."):
             end_action = "String.Delimiter"
         else:
-            end_action = self.capture_action(end, pattern.get("endCaptures"), None)
-        end_rule = f"({self.q(end)}, {end_action}, '#pop')"
+            end, end_action = self.capture_action(end, pattern.get("endCaptures"), None)
+        end_rule = f"({self.regex(end)}, {end_action}, '#pop')"
         body_rules = self.states[body]
-        if pattern.get("applyEndPatternLast"):
-            pass
-        else:
+        if not pattern.get("applyEndPatternLast"):
             body_rules.append(end_rule)
 
         for child in pattern.get("patterns", []):
@@ -215,19 +281,20 @@ class Compiler:
         elif content_token and content_token.startswith("String."):
             begin_action = "String.Delimiter"
         else:
-            begin_action = self.capture_action(begin, pattern.get("beginCaptures"), pattern.get("name"))
-        return f"({self.q(begin)}, {begin_action}, {self.q(body)})"
+            begin, begin_action = self.capture_action(begin, pattern.get("beginCaptures"), pattern.get("name"))
+        return f"({self.regex(begin)}, {begin_action}, {self.q(body)})"
 
     def repo_state(self, key: str) -> str:
         if key not in self.repository:
             raise ValueError(f"Unknown TextMate repository reference #{key}")
-        state = f"repo_{re.sub(r'[^A-Za-z0-9_]', '_', key)}"
+        state = re.sub(r'[^A-Za-z0-9_]', '_', key)
         if state in self.states:
             return state
         self.states[state] = []
         value = self.repository[key]
         if "begin" in value:
-            self.states[state].append(self.add_context(value, f"body_{state}"))
+            body = state + ("_content" if state.endswith("_body") else "_body")
+            self.states[state].append(self.add_context(value, body))
         elif "match" in value:
             self.states[state].extend(self.compile_pattern(value))
         else:
@@ -247,8 +314,8 @@ class Compiler:
             return [self.add_context(pattern)]
         if "match" in pattern:
             regex = pattern["match"]
-            action = self.capture_action(regex, pattern.get("captures"), pattern.get("name"))
-            return [f"({self.q(regex)}, {action})"]
+            regex, action = self.capture_action(regex, pattern.get("captures"), pattern.get("name"))
+            return [f"({self.regex(regex)}, {action})"]
         unsupported = set(pattern) - {"name", "contentName", "patterns", "repository"}
         if unsupported:
             raise ValueError(f"Unsupported TextMate rule keys: {sorted(unsupported)}")
@@ -268,6 +335,7 @@ class Compiler:
         # include graphs. Context recursion is represented with state pushes,
         # not recursive includes; verify the remaining include graph is acyclic.
         self.check_include_cycles()
+        self.inline_wrappers()
 
         lines = [
             '"""Generated Pygments lexer for Alloy. Do not edit by hand.',
@@ -275,28 +343,8 @@ class Compiler:
             'Source: grammar/alloy.tmLanguage.json',
             '"""',
             "import re",
-            "from pygments.lexer import RegexLexer, include",
+            "from pygments.lexer import RegexLexer, bygroups, include",
             "from pygments.token import Comment, Keyword, Name, Number, Operator, Punctuation, String, Text",
-            "",
-            "def _capture_groups(base, overrides):",
-            '    """Apply this grammar\'s ordered captures, using base for gaps."""',
-            "    def callback(lexer, match, ctx=None):",
-            "        cursor = match.start()",
-            "        for group, token in sorted(overrides.items()):",
-            "            start, end = match.span(group)",
-            "            if start < 0 or end <= start:",
-            "                continue",
-            "            if start < cursor:",
-            '                raise ValueError("Overlapping captures are not supported")',
-            "            if start > cursor:",
-            "                yield cursor, base, match.string[cursor:start]",
-            "            yield start, token, match.string[start:end]",
-            "            cursor = end",
-            "        if cursor < match.end():",
-            "            yield cursor, base, match.string[cursor:match.end()]",
-            "        if ctx is not None:",
-            "            ctx.pos = match.end()",
-            "    return callback",
             "",
             "",
             "class AlloyLexer(RegexLexer):",
@@ -306,6 +354,9 @@ class Compiler:
             '    filenames = ["*.als"]',
             '    mimetypes = ["text/x-alloy"]',
             "    flags = re.MULTILINE",
+            "    # Rules are ordered. Includes share rules; a third tuple item pushes",
+            "    # a body state, and '#pop' returns to the enclosing state.",
+            "    # Whitespace gaps in mixed captures are explicit Text groups.",
             "    tokens = {",
         ]
         for state, rules in self.states.items():
@@ -314,6 +365,20 @@ class Compiler:
             lines.append("        ],")
         lines.extend(["    }", ""])
         return "\n".join(lines)
+
+    def inline_wrappers(self):
+        """Remove one-rule include wrappers, retaining all pushed body states."""
+        wrappers = {state: rules[0] for state, rules in self.states.items()
+                    if state != "root" and state not in self.pushed_states and len(rules) == 1}
+
+        def expand(rule):
+            match = re.fullmatch(r"include\('([^']+)'\)", rule)
+            if match and match[1] in wrappers:
+                return expand(wrappers[match[1]])
+            return rule
+
+        self.states = {state: [expand(rule) for rule in rules]
+                       for state, rules in self.states.items() if state not in wrappers}
 
     def check_include_cycles(self):
         graph: dict[str, set[str]] = {}

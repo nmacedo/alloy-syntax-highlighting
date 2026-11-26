@@ -1,7 +1,7 @@
 # Alloy syntax highlighting for Sublime Text
 
 Syntax highlighting for Alloy 6 `.als` files using a TextMate grammar.
-Release version: `1.0.0` (`v1.0.0`).
+Release version: `1.1.0` (`v1.1.0`).
 
 ## Install
 

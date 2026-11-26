@@ -2,7 +2,7 @@
   "name": "alloy-language",
   "displayName": "Alloy Language Support",
   "description": "Syntax highlighting for the Alloy 6 modeling language.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "YOUR_PUBLISHER_ID",
   "license": "MIT",
   "repository": {

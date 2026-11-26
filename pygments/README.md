@@ -1,12 +1,12 @@
 # Alloy syntax highlighting for Pygments
 
 A Pygments lexer for Alloy 6 source files.
-Release version: `1.0.0` (`v1.0.0`).
+Release version: `1.1.0` (`v1.1.0`).
 
 ## Install
 
 ```sh
-python -m pip install git+https://github.com/nmacedo/alloy-pygments-highlighting.git@v1.0.0
+python3 -m pip install git+https://github.com/nmacedo/alloy-pygments-highlighting.git@v1.1.0
 ```
 
 ## Use

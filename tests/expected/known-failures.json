@@ -9,13 +9,41 @@
     {"fixture":"declarations.als","line":183,"token":"let","occurrence":1,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
     {"fixture":"declarations.als","line":183,"token":"let","occurrence":1,"kind":"scope","scope":"meta.binding.let.alloy","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
     {"fixture":"formulas.als","line":187,"token":"one","kind":"scope","scope":"storage.modifier.alloy","observed":"keyword.operator.word.alloy","reason":"arrow-multiplicity-after-line-comment"},
-    {"fixture":"formulas.als","line":187,"token":"one","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"keyword.operator.word.alloy","reason":"arrow-multiplicity-after-line-comment"}
+    {"fixture":"formulas.als","line":187,"token":"one","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"keyword.operator.word.alloy","reason":"arrow-multiplicity-after-line-comment"},
+    {"fixture":"declarations.als","line":252,"token":"let","scope":"keyword.operator.word.alloy","kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":252,"token":"let","scope":"meta.binding.let.alloy","kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":253,"token":"let","scope":"keyword.operator.word.alloy","kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":253,"token":"let","scope":"meta.binding.let.alloy","kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":255,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":255,"token":"let","scope":"meta.binding.let.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":256,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":256,"token":"let","scope":"meta.binding.let.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":257,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":257,"token":"let","scope":"meta.binding.let.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":262,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":262,"token":"let","scope":"meta.binding.let.alloy","occurrence":1,"kind":"scope","observed":"keyword.declaration.function.alloy","reason":"inline-macro-let-boundary"},
+    {"fixture":"signatures.als","line":83,"token":"one","kind":"scope","scope":"storage.modifier.alloy","observed":"keyword.operator.word.alloy","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":83,"token":"one","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"keyword.operator.word.alloy","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":85,"token":"lone","kind":"scope","scope":"storage.modifier.alloy","observed":"keyword.operator.word.alloy","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":85,"token":"lone","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"keyword.operator.word.alloy","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":87,"token":"some","kind":"scope","scope":"storage.modifier.alloy","observed":"keyword.operator.word.alloy","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":87,"token":"some","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"keyword.operator.word.alloy","reason":"signature-modifier-across-lines"},
+    {"fixture":"formulas.als","line":206,"token":"=","kind":"scope","scope":"keyword.operator.assignment.alloy","observed":"keyword.operator.comparison.alloy","reason":"let-comprehension-boundary"},
+    {"fixture":"formulas.als","line":206,"token":"=","kind":"scope","scope":"meta.binding.let.alloy","observed":"keyword.operator.comparison.alloy","reason":"let-comprehension-boundary"},
+    {"fixture":"formulas.als","line":207,"token":"=","occurrence":2,"kind":"scope","scope":"keyword.operator.assignment.alloy","observed":"keyword.operator.comparison.alloy","reason":"let-comprehension-boundary"},
+    {"fixture":"formulas.als","line":207,"token":"=","occurrence":2,"kind":"scope","scope":"meta.binding.let.alloy","observed":"keyword.operator.comparison.alloy","reason":"let-comprehension-boundary"}
   ],
   "pygments": [
     {"fixture":"declarations.als","line":179,"token":"let","occurrence":1,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
     {"fixture":"declarations.als","line":181,"token":"let","occurrence":1,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
     {"fixture":"declarations.als","line":181,"token":"let","occurrence":2,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
-    {"fixture":"declarations.als","line":183,"token":"let","occurrence":1,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"}
+    {"fixture":"declarations.als","line":183,"token":"let","occurrence":1,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":252,"token":"let","scope":"keyword.operator.word.alloy","kind":"scope","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":253,"token":"let","scope":"keyword.operator.word.alloy","kind":"scope","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":255,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":256,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":257,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":262,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"Token.Keyword.Declaration","reason":"inline-macro-let-boundary"}
   ],
   "codemirror": [
     {"fixture":"declarations.als","line":179,"token":"let","occurrence":1,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"keyword","reason":"inline-macro-let-boundary"},
@@ -23,6 +51,18 @@
     {"fixture":"declarations.als","line":181,"token":"let","occurrence":2,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"keyword","reason":"inline-macro-let-boundary"},
     {"fixture":"declarations.als","line":183,"token":"let","occurrence":1,"kind":"scope","scope":"keyword.operator.word.alloy","observed":"keyword","reason":"inline-macro-let-boundary"},
     {"fixture":"formulas.als","line":187,"token":"one","kind":"scope","scope":"storage.modifier.alloy","observed":"operator","reason":"arrow-multiplicity-after-line-comment"},
-    {"fixture":"formulas.als","line":187,"token":"one","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"operator","reason":"arrow-multiplicity-after-line-comment"}
+    {"fixture":"formulas.als","line":187,"token":"one","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"operator","reason":"arrow-multiplicity-after-line-comment"},
+    {"fixture":"declarations.als","line":252,"token":"let","scope":"keyword.operator.word.alloy","kind":"scope","observed":"keyword","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":253,"token":"let","scope":"keyword.operator.word.alloy","kind":"scope","observed":"keyword","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":255,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":256,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":257,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword","reason":"inline-macro-let-boundary"},
+    {"fixture":"declarations.als","line":262,"token":"let","scope":"keyword.operator.word.alloy","occurrence":1,"kind":"scope","observed":"keyword","reason":"inline-macro-let-boundary"},
+    {"fixture":"signatures.als","line":83,"token":"one","kind":"scope","scope":"storage.modifier.alloy","observed":"operator","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":83,"token":"one","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"operator","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":85,"token":"lone","kind":"scope","scope":"storage.modifier.alloy","observed":"operator","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":85,"token":"lone","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"operator","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":87,"token":"some","kind":"scope","scope":"storage.modifier.alloy","observed":"operator","reason":"signature-modifier-across-lines"},
+    {"fixture":"signatures.als","line":87,"token":"some","kind":"notScope","scope":"keyword.operator.word.alloy","observed":"operator","reason":"signature-modifier-across-lines"}
   ]
 }

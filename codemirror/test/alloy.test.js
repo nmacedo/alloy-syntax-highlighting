@@ -59,16 +59,20 @@ function findOccurrence(line, needle, occurrence = 0) {
   return position;
 }
 
-function tokenize(source) {
-  const state = EditorState.create({doc: source, extensions: [alloy]});
+function tokensForState(state) {
   const tokens = [];
-  const tree = ensureSyntaxTree(state, source.length, 1000) || syntaxTree(state);
+  const tree = ensureSyntaxTree(state, state.doc.length, 1000) || syntaxTree(state);
   tree.iterate({
     enter(node) {
       if (!node.type.isTop) tokens.push({from: node.from, to: node.to, style: node.type.name});
     },
   });
-  return {state, tokens};
+  return tokens;
+}
+
+function tokenize(source) {
+  const state = EditorState.create({doc: source, extensions: [alloy]});
+  return {state, tokens: tokensForState(state)};
 }
 
 test("all fixture scope assertions map to CodeMirror tags", () => {
@@ -175,6 +179,27 @@ test("indentation follows Alloy block and grouping delimiters", () => {
   const state = EditorState.create({doc: source, extensions: [alloy]});
   assert.equal(getIndentation(state, state.doc.line(2).from), 2);
   assert.equal(getIndentation(state, state.doc.line(3).from), 0);
+});
+
+test("incremental edits produce the same tokens as a fresh parse", () => {
+  for (const filename of fs.readdirSync(FIXTURES).filter(name => name.endsWith(".als"))) {
+    const source = fs.readFileSync(path.join(FIXTURES, filename), "utf8");
+    let {state} = tokenize(source);
+    const position = source.indexOf("\n", Math.floor(source.length / 2)) + 1;
+    const comment = "// incremental edit\n";
+    const edits = [
+      {from: position, insert: comment},
+      {from: position, to: position + comment.length, insert: ""},
+      {from: 0, insert: "/*\n"},
+      {from: 0, to: 3, insert: ""},
+    ];
+    for (const changes of edits) {
+      state = state.update({changes}).state;
+      const actual = tokensForState(state);
+      const fresh = tokenize(state.doc.toString()).tokens;
+      assert.deepEqual(actual, fresh, `${filename}: ${JSON.stringify(changes)}`);
+    }
+  }
 });
 
 test("meta-identifiers use the standard constant tag", () => {

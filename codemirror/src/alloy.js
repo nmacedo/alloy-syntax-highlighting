@@ -1,70 +1,71 @@
 // Generated from grammar/alloy.tmLanguage.json by codemirror/build.py.
-// This is a CodeMirror rule table, not an embedded TextMate grammar.
+// Ordered scanners follow the grammar's repository groups. Shared streaming
+// mechanics (context stack, lookbehind history, and captures) follow below.
 import {StreamLanguage} from "@codemirror/language";
 import {tags} from "@lezer/highlight";
 
 const NO_MATCH = Symbol("no match");
 const RESTART = Symbol("restart after context entry");
 function scanNothing() { return NO_MATCH; }
+
+// Grammar-derived scanners. Rule order is significant. Regex flags: `y`
+// anchors a match at the current position; `d` supplies capture boundaries.
 function scanComments(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule1" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("//", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule1"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "$", endCaptures: {}, style: "comment", contentStyle: null, scan: scanNothing, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "comment"}, "comment") : RESTART;
-  }
-}
-  if (state.zeroRule !== "rule2" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("--", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule2"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "$", endCaptures: {}, style: "comment", contentStyle: null, scan: scanNothing, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "comment"}, "comment") : RESTART;
-  }
-}
-  if (state.zeroRule !== "rule3" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("/\\*\\*(?!/)", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule3"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\*/", endCaptures: {"0": "comment"}, style: "docComment", contentStyle: null, scan: scanNothing, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "comment"}, "docComment") : RESTART;
-  }
-}
-  if (state.zeroRule !== "rule4" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("/\\*", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule4"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\*/", endCaptures: {"0": "comment"}, style: "comment", contentStyle: null, scan: scanNothing, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "comment"}, "comment") : RESTART;
-  }
-}
+  let result;
+  if ((result = enterContext(stream, state, {
+    id: "rule1",
+    begin: /\/\//dy, end: /$/dy,
+    scan: scanNothing,
+    style: "comment",
+  })) !== NO_MATCH) return result;
+  if ((result = enterContext(stream, state, {
+    id: "rule2",
+    begin: /--/dy, end: /$/dy,
+    scan: scanNothing,
+    style: "comment",
+  })) !== NO_MATCH) return result;
+  if ((result = enterContext(stream, state, {
+    id: "rule3",
+    begin: /\/\*\*(?!\/)/dy, end: /\*\//dy,
+    scan: scanNothing,
+    style: "docComment",
+    delimiterStyle: "comment",
+  })) !== NO_MATCH) return result;
+  if ((result = enterContext(stream, state, {
+    id: "rule4",
+    begin: /\/\*/dy, end: /\*\//dy,
+    scan: scanNothing,
+    style: "comment",
+  })) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanMetaString(stream, state) {
-  let m, result;
-  if ((m = matchAt("\\\\.", stream, state))) return emitMatch(stream, state, m, {}, "string");
+  let match;
+  if ((match = matchAt(/\\./dy, stream, state)))
+    return emitMatch(stream, state, match, "string");
   return NO_MATCH;
 }
 
 function scanStrings(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule5" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\"", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule5"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\"", endCaptures: {"0": "string"}, style: null, contentStyle: "string", scan: scanMetaString, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "string"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule5",
+    begin: /"/dy, end: /"/dy,
+    scan: scanMetaString,
+    contentStyle: "string",
+    delimiterStyle: "string",
+  });
 }
 
 function scanDeclarationKeywords(stream, state) {
-  let m, result;
-  if ((m = matchAt("(?:\\b(pred|fun)\\b)|(?:\\b(enum)\\b)|(?:\\b(module)\\b)|(?:\\b(run|check)\\b)|(?:\\b(assert)\\b)|(?:\\b(fact)\\b)", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
+  let match;
+  if ((match = matchAt(/(?:\b(pred|fun)\b)|(?:\b(enum)\b)|(?:\b(module)\b)|(?:\b(run|check)\b)|(?:\b(assert)\b)|(?:\b(fact)\b)/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
   return NO_MATCH;
 }
 
-function scanContext(stream, state) {
-  let m, result;
+function scanTopLevelLetDeclarationsBody(stream, state) {
+  let result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   if ((result = scanTopLevelLetHeader(stream, state)) !== NO_MATCH) return result;
@@ -74,51 +75,37 @@ function scanContext(stream, state) {
 }
 
 function scanTopLevelLetDeclarations(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule6" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\blet\\b", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule6"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?<=\\})|(?=(?:[ \\t]+|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*|--[^\\r\\n]*)*(?:(?:private|abstract|one|lone|some|var)\\b[ \\t]+)*(?:module|open|sig|enum|pred|fun|fact|assert|run|check|let)\\b)", endCaptures: {}, style: null, contentStyle: null, scan: scanContext, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "keyword"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule6",
+    begin: /\blet\b/dy, end: /(?<=\})|(?=(?:[ \t]+|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*|--[^\r\n]*)*(?:(?:private|abstract|one|lone|some|var)\b[ \t]+)*(?:module|open|sig|enum|pred|fun|fact|assert|run|check|let)\b)/dy,
+    scan: scanTopLevelLetDeclarationsBody,
+    beginStyle: "keyword",
+  });
 }
 
-function scanContext8(stream, state) {
-  let m, result;
-  if ((result = scanIdentifierListItems(stream, state)) !== NO_MATCH) return result;
-  return NO_MATCH;
-}
-
-function scanContext7(stream, state) {
-  let m, result;
+function scanTopLevelLetHeaderBody(stream, state) {
+  let result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
-  if (state.zeroRule !== "rule8" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\[", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule8"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\]", endCaptures: {"0": "punctuation"}, style: null, contentStyle: null, scan: scanContext8, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "punctuation"}, null) : RESTART;
-  }
-}
+  if ((result = enterContext(stream, state, {
+    id: "rule8",
+    begin: /\[/dy, end: /\]/dy,
+    scan: scanIdentifierListItems,
+    delimiterStyle: "punctuation",
+  })) !== NO_MATCH) return result;
   if ((result = scanIdentifiers(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanTopLevelLetHeader(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule7" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("(?=[A-Za-z_])", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule7"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=(?:\\s|//[^\\r\\n]*|--[^\\r\\n]*|/\\*[\\s\\S]*?\\*/)*(?:=|\\{))", endCaptures: {}, style: null, contentStyle: null, scan: scanContext7, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule7",
+    begin: /(?=[A-Za-z_])/dy, end: /(?=(?:\s|\/\/[^\r\n]*|--[^\r\n]*|\/\*[\s\S]*?\*\/)*(?:=|\{))/dy,
+    scan: scanTopLevelLetHeaderBody,
+  });
 }
 
 function scanMetaBindingMacro(stream, state) {
-  let m, result;
+  let result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   if ((result = scanBlockExpressions(stream, state)) !== NO_MATCH) return result;
@@ -126,270 +113,267 @@ function scanMetaBindingMacro(stream, state) {
 }
 
 function scanTopLevelLetExpressionBody(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule9" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("=", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule9"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=(?:[ \\t]+|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*|--[^\\r\\n]*)*(?:(?:private|abstract|one|lone|some|var)\\b[ \\t]+)*(?:module|open|sig|enum|pred|fun|fact|assert|run|check|let)\\b)", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaBindingMacro, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "operator"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule9",
+    begin: /=/dy, end: /(?=(?:[ \t]+|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*|--[^\r\n]*)*(?:(?:private|abstract|one|lone|some|var)\b[ \t]+)*(?:module|open|sig|enum|pred|fun|fact|assert|run|check|let)\b)/dy,
+    scan: scanMetaBindingMacro,
+    beginStyle: "operator",
+  });
 }
 
 function scanTopLevelLetBlockBody(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule10" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("(?=\\{)", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule10"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?<=\\})", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaBindingMacro10, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {}, null) : RESTART;
-  }
+  return enterContext(stream, state, {
+    id: "rule10",
+    begin: /(?=\{)/dy, end: /(?<=\})/dy,
+    scan: scanMetaBindingMacro10,
+  });
 }
+
+function scanCallableDeclarationsBody(stream, state) {
+  let result;
+  if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
+  if ((result = scanCallableDeclarationParameters(stream, state)) !== NO_MATCH) return result;
+  if ((result = scanIdentifiers(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
-function scanContext11(stream, state) {
-  let m, result;
+function scanCallableDeclarations(stream, state) {
+  return enterContext(stream, state, {
+    id: "rule11",
+    begin: /\b(fun|pred)\b/dy, end: /(?=[:{])/dy,
+    scan: scanCallableDeclarationsBody,
+    beginStyle: "keyword",
+  });
+}
+
+function scanCallableDeclarationParametersBody(stream, state) {
+  let match, result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   if ((result = scanCallableParameterValue(stream, state)) !== NO_MATCH) return result;
-  if ((m = matchAt("\\b(disj|var)\\b(?!\\$)", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
-  if ((m = matchAt(",", stream, state))) return emitMatch(stream, state, m, {}, "punctuation");
+  if ((match = matchAt(/\b(disj|var)\b(?!\$)/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
+  if ((match = matchAt(/,/dy, stream, state)))
+    return emitMatch(stream, state, match, "punctuation");
   if ((result = scanBlockExpressions(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanCallableDeclarationParameters(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule11" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\b(fun|pred)\\b\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(\\[)", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule11"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\]", endCaptures: {"0": "punctuation"}, style: null, contentStyle: null, scan: scanContext11, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"1": "keyword", "2": "variableName", "3": "punctuation"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule12",
+    begin: /\[/dy, end: /\]/dy,
+    scan: scanCallableDeclarationParametersBody,
+    delimiterStyle: "punctuation",
+  });
 }
 
 function scanIdentifierListItems(stream, state) {
-  let m, result;
+  let match, result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
-  if ((m = matchAt(",", stream, state))) return emitMatch(stream, state, m, {}, "punctuation");
+  if ((match = matchAt(/,/dy, stream, state)))
+    return emitMatch(stream, state, match, "punctuation");
   if ((result = scanIdentifiers(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanModulePathArguments(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule12" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\[", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule12"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\]", endCaptures: {"0": "punctuation"}, style: null, contentStyle: null, scan: scanMetaParametersModule, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "punctuation"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule13",
+    begin: /\[/dy, end: /\]/dy,
+    scan: scanIdentifierListItems,
+    delimiterStyle: "punctuation",
+  });
 }
 
 function scanModulePathComponents(stream, state) {
-  let m, result;
+  let match, result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanModulePathArguments(stream, state)) !== NO_MATCH) return result;
-  if ((m = matchAt("\\b[A-Za-z_][A-Za-z0-9_]*\\b", stream, state))) return emitMatch(stream, state, m, {}, "variableName");
-  if ((m = matchAt("/", stream, state))) return emitMatch(stream, state, m, {}, "punctuation");
-  return NO_MATCH;
-}
-
-function scanMetaPathModule(stream, state) {
-  let m, result;
-  if ((result = scanModulePathComponents(stream, state)) !== NO_MATCH) return result;
+  if ((match = matchAt(/\b[A-Za-z_][A-Za-z0-9_]*\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "variableName");
+  if ((match = matchAt(/\//dy, stream, state)))
+    return emitMatch(stream, state, match, "punctuation");
   return NO_MATCH;
 }
 
 function scanMetaPathOpen(stream, state) {
-  let m, result;
+  let match, result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
-  if ((m = matchAt("\\bas\\b", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
+  if ((match = matchAt(/\bas\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
   if ((result = scanModulePathComponents(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanModuleDeclarationsAndImports(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule13" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\b(module)\\b", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule13"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=(?:\\s|//[^\\r\\n]*|--[^\\r\\n]*|/\\*[\\s\\S]*?\\*/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|let|private|abstract|one|lone|some|var)\\b)", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaPathModule, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "keyword"}, null) : RESTART;
-  }
-}
-  if (state.zeroRule !== "rule14" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\b(open)\\b", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule14"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=(?:\\s|//[^\\r\\n]*|--[^\\r\\n]*|/\\*[\\s\\S]*?\\*/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|let|private|abstract|one|lone|some|var)\\b)", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaPathOpen, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "keyword"}, null) : RESTART;
-  }
-}
+  let result;
+  if ((result = enterContext(stream, state, {
+    id: "rule14",
+    begin: /\b(module)\b/dy, end: /(?=(?:\s|\/\/[^\r\n]*|--[^\r\n]*|\/\*[\s\S]*?\*\/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|let|private|abstract|one|lone|some|var)\b)/dy,
+    scan: scanModulePathComponents,
+    beginStyle: "keyword",
+  })) !== NO_MATCH) return result;
+  if ((result = enterContext(stream, state, {
+    id: "rule15",
+    begin: /\b(open)\b/dy, end: /(?=(?:\s|\/\/[^\r\n]*|--[^\r\n]*|\/\*[\s\S]*?\*\/)*(?:open|sig|enum|pred|fun|fact|assert|run|check|let|private|abstract|one|lone|some|var)\b)/dy,
+    scan: scanMetaPathOpen,
+    beginStyle: "keyword",
+  })) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
-function scanContext15(stream, state) {
-  let m, result;
-  if ((m = matchAt("\\b(sig)\\b(?!\\$)", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
+function scanSignatureDeclarationsBody(stream, state) {
+  let match, result;
+  if ((match = matchAt(/\b(sig)\b(?!\$)/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
   if ((result = scanSignatureHierarchy(stream, state)) !== NO_MATCH) return result;
   if ((result = scanSignatureFields(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanSignatureDeclarations(stream, state) {
-  let m, result;
-  if ((m = matchAt("(?:\\b(abstract|private|var)\\b(?!\\$))|(?:\\b(one|lone|some)\\b(?=(?:(?:\\s+)|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*|--[^\\r\\n]*|\\b(?:abstract|private|var|one|lone|some)\\b)*\\bsig\\b(?!\\$)))", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
-  if (state.zeroRule !== "rule15" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("(?=\\bsig\\b(?!\\$))", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule15"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?<=\\})", endCaptures: {}, style: null, contentStyle: null, scan: scanContext15, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {}, null) : RESTART;
-  }
-}
+  let match, result;
+  if ((match = matchAt(/(?:\b(abstract|private|var)\b(?!\$))|(?:\b(one|lone|some)\b(?=(?:(?:\s+)|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*|--[^\r\n]*|\b(?:abstract|private|var|one|lone|some)\b)*\bsig\b(?!\$)))/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
+  if ((result = enterContext(stream, state, {
+    id: "rule16",
+    begin: /(?=\bsig\b(?!\$))/dy, end: /(?<=\})/dy,
+    scan: scanSignatureDeclarationsBody,
+  })) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanMetaIdentifiers(stream, state) {
-  let m, result;
-  if ((m = matchAt("(?:\\b(sig|field)\\$(?![A-Za-z0-9_]))|(?:\\b(static|var)\\$(?![A-Za-z0-9_]))", stream, state))) return emitMatch(stream, state, m, {}, "constant");
-  if ((m = matchAt("\\$", stream, state))) return emitMatch(stream, state, m, {}, "punctuation");
+  let match;
+  if ((match = matchAt(/(?:\b(sig|field)\$(?![A-Za-z0-9_]))|(?:\b(static|var)\$(?![A-Za-z0-9_]))/dy, stream, state)))
+    return emitMatch(stream, state, match, "constant");
+  if ((match = matchAt(/\$/dy, stream, state)))
+    return emitMatch(stream, state, match, "punctuation");
   return NO_MATCH;
 }
 
 function scanKeywords(stream, state) {
-  let m, result;
-  if ((m = matchAt("(?:\\b(for|but|exactly|expect|with)\\b)|(?:\\b(enabled|event|invariant|modifies)\\b)", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
-  if ((m = matchAt("\\b(Int|String|int|seq|steps)\\b", stream, state))) return emitMatch(stream, state, m, {}, "typeName");
-  if ((m = matchAt("\\b(this)\\b", stream, state))) return emitMatch(stream, state, m, {}, "atom");
-  return NO_MATCH;
-}
-
-function scanMetaGroup(stream, state) {
-  let m, result;
-  if ((result = scanBlockExpressions(stream, state)) !== NO_MATCH) return result;
+  let match;
+  if ((match = matchAt(/(?:\b(for|but|exactly|expect|with)\b)|(?:\b(enabled|event|invariant|modifies)\b)/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
+  if ((match = matchAt(/\b(Int|String|int|seq|steps)\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "typeName");
+  if ((match = matchAt(/\b(this)\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "atom");
   return NO_MATCH;
 }
 
 function scanExpressionGroups(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule16" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\(", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule16"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\)", endCaptures: {"0": "punctuation"}, style: null, contentStyle: null, scan: scanMetaGroup, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "punctuation"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule17",
+    begin: /\(/dy, end: /\)/dy,
+    scan: scanBlockExpressions,
+    delimiterStyle: "punctuation",
+  });
 }
 
 function scanMetaBrackets(stream, state) {
-  let m, result;
-  if ((m = matchAt("\\b(disj)\\b(?!\\$)", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
+  let match, result;
+  if ((match = matchAt(/\b(disj)\b(?!\$)/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
   if ((result = scanBlockExpressions(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanExpressionBrackets(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule17" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\[", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule17"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\]", endCaptures: {"0": "punctuation"}, style: null, contentStyle: null, scan: scanMetaBrackets, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "punctuation"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule18",
+    begin: /\[/dy, end: /\]/dy,
+    scan: scanMetaBrackets,
+    delimiterStyle: "punctuation",
+  });
 }
 
 function scanExpressionBlocks(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule18" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\{", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule18"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\}", endCaptures: {"0": "punctuation"}, style: null, contentStyle: null, scan: scanMetaBlock, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "punctuation"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule19",
+    begin: /\{/dy, end: /\}/dy,
+    scan: scanBlockExpressions,
+    delimiterStyle: "punctuation",
+  });
 }
 
-function scanContext19(stream, state) {
-  let m, result;
+function scanBlockExpressionsBody(stream, state) {
+  let result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
-function scanContext22(stream, state) {
-  let m, result;
+function scanMetaBindingLet22Body(stream, state) {
+  let result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   if ((result = scanIdentifiers(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
-function scanMetaBindingLet21(stream, state) {
-  let m, result;
+function scanMetaBindingLet22(stream, state) {
+  let result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
-  if (state.zeroRule !== "rule22" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt(",", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule22"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(=)|(?=\\S)(?![A-Za-z_]|/\\*|//|--)", endCaptures: {"1": "operator"}, style: null, contentStyle: null, scan: scanContext22, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "punctuation"}, null) : RESTART;
-  }
-}
+  if ((result = enterContext(stream, state, {
+    id: "rule23",
+    begin: /,/dy, end: /(=)|(?=\S)(?![A-Za-z_]|\/\*|\/\/|--)/dy,
+    scan: scanMetaBindingLet22Body,
+    beginStyle: "punctuation",
+    endCaptures: {"1": "operator"},
+  })) !== NO_MATCH) return result;
   if ((result = scanBlockExpressions(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanMetaBindingLet(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule21" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("=", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule21"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=\\|(?!\\|)|\\{(?!\\s*[A-Za-z_][A-Za-z0-9_]*\\s*:))", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaBindingLet21, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "operator"}, null) : RESTART;
-  }
-}
+  let result;
+  if ((result = enterContext(stream, state, {
+    id: "rule22",
+    begin: /=/dy, end: /(?=\|(?!\|)|\{(?!\s*[A-Za-z_][A-Za-z0-9_]*\s*:))/dy,
+    scan: scanMetaBindingLet22,
+    beginStyle: "operator",
+  })) !== NO_MATCH) return result;
   if ((result = scanBlockExpressions(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanBlockExpressions(stream, state) {
-  let m, result;
+  let match, result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   if ((result = scanExpressionGroups(stream, state)) !== NO_MATCH) return result;
   if ((result = scanExpressionBrackets(stream, state)) !== NO_MATCH) return result;
   if ((result = scanExpressionBlocks(stream, state)) !== NO_MATCH) return result;
-  if (state.zeroRule !== "rule19" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("(:)(?!>)|(->)", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule19"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "((?:one|lone|some|set)\\b)|(?=\\S)(?!/\\*|//|--)", endCaptures: {"1": "keyword"}, style: null, contentStyle: null, scan: scanContext19, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"1": "punctuation", "2": "operator"}, null) : RESTART;
-  }
-}
-  if ((m = matchAt("(?:(?<=:\\s*)(one|lone|some|set)\\b)|(?:(?<=->\\s*)(one|lone|some|set)\\b)", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
+  if ((result = enterContext(stream, state, {
+    id: "rule20",
+    begin: /(:)(?!>)|(->)/dy, end: /((?:one|lone|some|set)\b)|(?=\S)(?!\/\*|\/\/|--)/dy,
+    scan: scanBlockExpressionsBody,
+    beginCaptures: {"1": "punctuation", "2": "operator"},
+    endCaptures: {"1": "keyword"},
+  })) !== NO_MATCH) return result;
+  if ((match = matchAt(/(?:(?<=:\s*)(one|lone|some|set)\b)|(?:(?<=->\s*)(one|lone|some|set)\b)/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
   if ((result = scanPunctuation(stream, state)) !== NO_MATCH) return result;
-  if ((m = matchAt("(?:\\b(disj|var)\\b(?!\\$))|(?:\\b(one|lone|some|set)\\b(?=(?:(?:\\s+)|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*|--[^\\r\\n]*)*->))", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
-  if ((m = matchAt("(?:\\b(and|or|not|implies|iff|else)\\b)|(?:\\b(all|no|one|some|lone)\\b)|(?:\\b(always|eventually|after|before|until|releases|since|triggered|historically|once)\\b)", stream, state))) return emitMatch(stream, state, m, {}, "operator");
-  if (state.zeroRule !== "rule20" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\blet\\b", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule20"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=\\|(?!\\|)|\\{(?!\\s*[A-Za-z_][A-Za-z0-9_]*\\s*:))", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaBindingLet, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "operator"}, null) : RESTART;
-  }
-}
-  if ((m = matchAt("(?:\\b(in)\\b)|(?:\\b(sum|int)\\b)", stream, state))) return emitMatch(stream, state, m, {}, "operator");
-  if ((m = matchAt("\\b(seq)\\b", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
-  if ((m = matchAt("(?:<=>|=>|!|&&|\\|\\||;)|(?:>>>|>>|<<)|(?:\\+\\+|->|<:|:>|\\+|-|&|\\*|\\^|~|\\.|#|')|(?:=<|>=|=|<|>)", stream, state))) return emitMatch(stream, state, m, {}, "operator");
+  if ((match = matchAt(/(?:\b(disj|var)\b(?!\$))|(?:\b(one|lone|some|set)\b(?=(?:(?:\s+)|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*|--[^\r\n]*)*->))/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
+  if ((match = matchAt(/(?:\b(and|or|not|implies|iff|else)\b)|(?:\b(all|no|one|some|lone)\b)|(?:\b(always|eventually|after|before|until|releases|since|triggered|historically|once)\b)/dy, stream, state)))
+    return emitMatch(stream, state, match, "operator");
+  if ((result = enterContext(stream, state, {
+    id: "rule21",
+    begin: /\blet\b/dy, end: /(?=\|(?!\|)|\{(?!\s*[A-Za-z_][A-Za-z0-9_]*\s*:))/dy,
+    scan: scanMetaBindingLet,
+    beginStyle: "operator",
+  })) !== NO_MATCH) return result;
+  if ((match = matchAt(/(?:\b(in)\b)|(?:\b(sum|int)\b)/dy, stream, state)))
+    return emitMatch(stream, state, match, "operator");
+  if ((match = matchAt(/\b(seq)\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
+  if ((match = matchAt(/(?:<=>|=>|!|&&|\|\||;)|(?:>>>|>>|<<)|(?:\+\+|->|<:|:>|\+|-|&|\*|\^|~|\.|#|')|(?:=<|>=|=|<|>)/dy, stream, state)))
+    return emitMatch(stream, state, match, "operator");
   if ((result = scanMetaIdentifiers(stream, state)) !== NO_MATCH) return result;
   if ((result = scanKeywords(stream, state)) !== NO_MATCH) return result;
   if ((result = scanConstants(stream, state)) !== NO_MATCH) return result;
@@ -398,31 +382,37 @@ function scanBlockExpressions(stream, state) {
 }
 
 function scanPunctuation(stream, state) {
-  let m, result;
-  if ((m = matchAt("(?:\\.\\.)|(?:,|:(?!>)|(?<!\\|)\\|(?!\\|))|(?:@)", stream, state))) return emitMatch(stream, state, m, {}, "punctuation");
+  let match;
+  if ((match = matchAt(/(?:\.\.)|(?:,|:(?!>)|(?<!\|)\|(?!\|))|(?:@)/dy, stream, state)))
+    return emitMatch(stream, state, match, "punctuation");
   return NO_MATCH;
 }
 
 function scanConstants(stream, state) {
-  let m, result;
-  if ((m = matchAt("(?:\\b0x(?:_|[0-9A-Fa-f]{2})+\\b)|(?:\\b0b[01_]+\\b)|(?:\\b[0-9][0-9_]*\\b)", stream, state))) return emitMatch(stream, state, m, {}, "number");
-  if ((m = matchAt("\\b(univ|iden|none)\\b", stream, state))) return emitMatch(stream, state, m, {}, "atom");
+  let match;
+  if ((match = matchAt(/(?:\b0x(?:_|[0-9A-Fa-f]{2})+\b)|(?:\b0b[01_]+\b)|(?:\b[0-9][0-9_]*\b)/dy, stream, state)))
+    return emitMatch(stream, state, match, "number");
+  if ((match = matchAt(/\b(univ|iden|none)\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "atom");
   return NO_MATCH;
 }
 
 function scanIdentifiers(stream, state) {
-  let m, result;
-  if ((m = matchAt("\\b[A-Za-z_][A-Za-z0-9_]*\\b", stream, state))) return emitMatch(stream, state, m, {}, "variableName");
+  let match;
+  if ((match = matchAt(/\b[A-Za-z_][A-Za-z0-9_]*\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "variableName");
   return NO_MATCH;
 }
 
 function scanMetaSignatureHierarchy(stream, state) {
-  let m, result;
+  let match, result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   if ((result = scanMetaIdentifiers(stream, state)) !== NO_MATCH) return result;
-  if ((m = matchAt("\\b(extends|in)\\b", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
-  if ((m = matchAt("(?:\\+)|(?:=)", stream, state))) return emitMatch(stream, state, m, {}, "operator");
+  if ((match = matchAt(/\b(extends|in)\b/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
+  if ((match = matchAt(/(?:\+)|(?:=)/dy, stream, state)))
+    return emitMatch(stream, state, match, "operator");
   if ((result = scanKeywords(stream, state)) !== NO_MATCH) return result;
   if ((result = scanConstants(stream, state)) !== NO_MATCH) return result;
   if ((result = scanIdentifiers(stream, state)) !== NO_MATCH) return result;
@@ -431,70 +421,58 @@ function scanMetaSignatureHierarchy(stream, state) {
 }
 
 function scanSignatureHierarchy(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule23" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("(?<=sig\\s*)", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule23"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=\\{)", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaSignatureHierarchy, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule24",
+    begin: /(?<=sig\s*)/dy, end: /(?=\{)/dy,
+    scan: scanMetaSignatureHierarchy,
+  });
 }
 
 function scanMetaBlockSignatureFields(stream, state) {
-  let m, result;
+  let match, result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
-  if ((m = matchAt("\\b(private|var|disj)\\b(?!\\$)", stream, state))) return emitMatch(stream, state, m, {}, "keyword");
+  if ((match = matchAt(/\b(private|var|disj)\b(?!\$)/dy, stream, state)))
+    return emitMatch(stream, state, match, "keyword");
   if ((result = scanFieldDeclarationValue(stream, state)) !== NO_MATCH) return result;
   if ((result = scanBlockExpressions(stream, state)) !== NO_MATCH) return result;
   return NO_MATCH;
 }
 
 function scanSignatureFields(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule24" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("\\{", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule24"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "\\}", endCaptures: {"0": "punctuation"}, style: null, contentStyle: null, scan: scanMetaBlockSignatureFields, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"0": "punctuation"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule25",
+    begin: /\{/dy, end: /\}/dy,
+    scan: scanMetaBlockSignatureFields,
+    delimiterStyle: "punctuation",
+  });
 }
 
 function scanFieldDeclarationValue(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule25" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("(:)(?!>)|(=)", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule25"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=,|\\})", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaDeclarationFieldValue, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"1": "punctuation", "2": "operator"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule26",
+    begin: /(?=:(?!>))|(=)/dy, end: /(?=,|\})/dy,
+    scan: scanBlockExpressions,
+    beginCaptures: {"1": "operator"},
+  });
 }
 
 function scanCallableParameterValue(stream, state) {
-  let m, result;
-  if (state.zeroRule !== "rule26" || state.zeroPosition !== stream.pos) {
-  if ((m = matchAt("(:)(?!>)|(=)", stream, state))) {
-    if (!m[0].length) { state.zeroRule = "rule26"; state.zeroPosition = stream.pos; }
-    state.contexts.push({end: "(?=,|\\])", endCaptures: {}, style: null, contentStyle: null, scan: scanMetaDeclarationParameterValue, openingStream: stream, openingPosition: stream.pos});
-    return m[0].length ? emitMatch(stream, state, m, {"1": "punctuation", "2": "operator"}, null) : RESTART;
-  }
-}
-  return NO_MATCH;
+  return enterContext(stream, state, {
+    id: "rule27",
+    begin: /(?=:(?!>))|(=)/dy, end: /(?=,|\])/dy,
+    scan: scanBlockExpressions,
+    beginCaptures: {"1": "operator"},
+  });
 }
 
 function scanRoot(stream, state) {
-  let m, result;
+  let result;
   if ((result = scanComments(stream, state)) !== NO_MATCH) return result;
   if ((result = scanStrings(stream, state)) !== NO_MATCH) return result;
   if ((result = scanModuleDeclarationsAndImports(stream, state)) !== NO_MATCH) return result;
   if ((result = scanSignatureDeclarations(stream, state)) !== NO_MATCH) return result;
-  if ((result = scanCallableDeclarationParameters(stream, state)) !== NO_MATCH) return result;
+  if ((result = scanCallableDeclarations(stream, state)) !== NO_MATCH) return result;
   if ((result = scanTopLevelLetDeclarations(stream, state)) !== NO_MATCH) return result;
   if ((result = scanDeclarationKeywords(stream, state)) !== NO_MATCH) return result;
   if ((result = scanMetaIdentifiers(stream, state)) !== NO_MATCH) return result;
@@ -509,26 +487,25 @@ function scanRoot(stream, state) {
 }
 
 const scanMetaBindingMacro10 = scanMetaBindingMacro;
-const scanMetaParametersModule = scanContext8;
-const scanMetaBlock = scanMetaGroup;
-const scanMetaDeclarationFieldValue = scanMetaGroup;
-const scanMetaDeclarationParameterValue = scanMetaGroup;
 
-function tagFor(style) {
-  return style && tokenTable[style] ? style : null;
-}
-
+// Streaming support. A frame stores its ending pattern and body scanner.
+// NO_MATCH tries the next rule; RESTART rescans after a zero-width begin.
 function startState() {
-  return {contexts: [], pending: [], delimiterDepth: 0, history: "", zeroRule: null, zeroPosition: -1};
+  return {
+    contexts: [], pending: [], delimiterDepth: 0, history: "",
+    zeroRule: null, zeroPosition: -1,
+  };
 }
 
 function copyState(state) {
-  return {contexts: state.contexts.slice(), pending: state.pending.slice(), delimiterDepth: state.delimiterDepth, history: state.history, zeroRule: state.zeroRule, zeroPosition: state.zeroPosition};
+  // Frames and pending pieces are immutable; only the arrays need copying.
+  return {...state, contexts: state.contexts.slice(), pending: state.pending.slice()};
 }
 
-function matchAt(pattern, stream, state) {
-  const expression = new RegExp(pattern, "dy");
-  if (!pattern.includes("(?<=")) {
+function matchAt(expression, stream, state) {
+  // Reset lastIndex on every call, including regexes shared by copied frames.
+  // Recent text supplies lookbehind context across CodeMirror's line streams.
+  if (!expression.source.includes("(?<=")) {
     expression.lastIndex = stream.pos;
     return expression.exec(stream.string);
   }
@@ -541,15 +518,33 @@ function matchAt(pattern, stream, state) {
   return match;
 }
 
-function queueMatch(state, match, captures, fallbackScope) {
+function enterContext(stream, state, rule) {
+  // A zero-width begin may be retried after its context ends without consuming
+  // text. Suppress that one rule until the stream makes progress.
+  if (state.zeroRule === rule.id && state.zeroPosition === stream.pos) return NO_MATCH;
+  const match = matchAt(rule.begin, stream, state);
+  if (!match) return NO_MATCH;
+  if (!match[0].length) {
+    state.zeroRule = rule.id;
+    state.zeroPosition = stream.pos;
+  }
+  state.contexts.push({...rule, openingStream: stream, openingPosition: stream.pos});
+  const style = rule.beginStyle ?? rule.delimiterStyle ?? rule.style ?? null;
+  return match[0].length
+    ? emitMatch(stream, state, match, style, rule.beginCaptures)
+    : RESTART;
+}
+
+function emitMatch(stream, state, match, style = null, captures = null) {
+  // Most rules style the entire match. Only mixed captures need a queue:
+  // StreamLanguage can return just one style from each token() call.
+  if (!captures) return consume(stream, state, match[0], style);
   const text = match[0];
-  const indices = match.indices || [];
   const ranges = [];
   const boundaries = new Set([0, text.length]);
-  for (const [index, capture] of Object.entries(captures || {})) {
-    const span = indices[Number(index)];
-    const tag = tagFor(capture);
-    if (!span || !tag) continue;
+  for (const [index, tag] of Object.entries(captures)) {
+    const span = match.indices[Number(index)];
+    if (!span) continue;
     const from = span[0] - match.index;
     const to = span[1] - match.index;
     ranges.push({from, to, tag});
@@ -559,44 +554,45 @@ function queueMatch(state, match, captures, fallbackScope) {
   const points = [...boundaries].sort((a, b) => a - b);
   for (let i = 0; i < points.length - 1; i++) {
     const from = points[i], to = points[i + 1];
-    let tag = tagFor(fallbackScope);
+    let tag = style;
     for (const range of ranges) {
       if (range.from <= from && range.to >= to) tag = range.tag;
     }
-    state.pending.push({length: to - from, tag, text: text.slice(from, to)});
+    state.pending.push({tag, text: text.slice(from, to)});
   }
-}
-
-function emitMatch(stream, state, match, captures, style) {
-  queueMatch(state, match, captures, style);
   return state.pending.length ? emitPending(stream, state) : null;
 }
 
 function emitPending(stream, state) {
   const part = state.pending.shift();
-  stream.pos += part.length;
-  state.history = (state.history + part.text).replace(/\s+/g, " ").slice(-64);
+  return consume(stream, state, part.text, part.tag);
+}
+
+function consume(stream, state, text, style) {
+  stream.pos += text.length;
+  state.history = (state.history + text).replace(/\s+/g, " ").slice(-64);
   state.zeroRule = null;
   state.zeroPosition = -1;
-  if (part.tag === "punctuation") {
-    if (/^[([{]$/.test(part.text)) state.delimiterDepth++;
-    else if (/^[)\]}]$/.test(part.text)) state.delimiterDepth = Math.max(0, state.delimiterDepth - 1);
+  if (style === "punctuation") {
+    if (/^[([{]$/.test(text)) state.delimiterDepth++;
+    else if (/^[)\]}]$/.test(text)) state.delimiterDepth = Math.max(0, state.delimiterDepth - 1);
   }
-  return part.tag;
+  return style;
 }
 
 function token(stream, state) {
   if (state.pending.length) return emitPending(stream, state);
-  while (state.contexts.length && state.contexts.at(-1).end === "$" && stream !== state.contexts.at(-1).openingStream) {
+  // Line comments must also end when CodeMirror skips a blank line.
+  while (state.contexts.length && state.contexts.at(-1).end.source === "$" && stream !== state.contexts.at(-1).openingStream) {
     state.contexts.pop();
   }
   const spaceContext = state.contexts.at(-1);
   if (stream.eatSpace()) {
     state.history = (state.history + stream.current()).replace(/\s+/g, " ").slice(-64);
-    return tagFor(spaceContext?.contentStyle || spaceContext?.style);
+    return spaceContext?.contentStyle || spaceContext?.style || null;
   }
 
-  while (state.contexts.length && state.contexts.at(-1).end === "(?<=\\})"
+  while (state.contexts.length && state.contexts.at(-1).end.source === "(?<=\\})"
          && (stream !== state.contexts.at(-1).openingStream || stream.pos !== state.contexts.at(-1).openingPosition)
          && state.history.trimEnd().endsWith("}")) {
     state.contexts.pop();
@@ -607,8 +603,8 @@ function token(stream, state) {
     if (ending) {
       state.contexts.pop();
       if (ending[0].length) {
-        queueMatch(state, ending, context.endCaptures, context.style);
-        return emitPending(stream, state);
+        const style = context.endStyle ?? context.delimiterStyle ?? context.style ?? null;
+        return emitMatch(stream, state, ending, style, context.endCaptures);
       }
       return token(stream, state);
     }
@@ -621,7 +617,7 @@ function token(stream, state) {
   if (stream.eol()) return null;
   stream.next();
   state.history = (state.history + stream.current()).replace(/\s+/g, " ").slice(-64);
-  return tagFor(context?.contentStyle || context?.style);
+  return context?.contentStyle || context?.style || null;
 }
 
 function indent(state, textAfter, context) {

@@ -6,6 +6,8 @@
 	<string>https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json</string>
 	<key>name</key>
 	<string>Alloy</string>
+	<key>comment</key>
+	<string>Declaration contexts resolve overloaded tokens before expression fallbacks. Root expressions cover function return types without guessing their boundaries. See docs/limitations.md.</string>
 	<key>patterns</key>
 	<array>
 		<dict>
@@ -26,7 +28,7 @@
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#callable-declaration-parameters</string>
+			<string>#callable-declarations</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -237,9 +239,13 @@
 		</dict>
 		<key>top-level-let-declarations</key>
 		<dict>
+			<key>comment</key>
+			<string>Top-level macros have optional untyped parameters and either = or brace bodies.</string>
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>comment</key>
+					<string>End after a brace body or before the next declaration. This conservative boundary misidentifies inner let-expressions in undelimited = bodies.</string>
 					<key>begin</key>
 					<string>\blet\b</string>
 					<key>beginCaptures</key>
@@ -280,6 +286,8 @@
 		</dict>
 		<key>top-level-let-header</key>
 		<dict>
+			<key>comment</key>
+			<string>Read the name and optional untyped parameters; leave = or { for the body rule.</string>
 			<key>begin</key>
 			<string>(?=[A-Za-z_])</string>
 			<key>end</key>
@@ -327,6 +335,8 @@
 		</dict>
 		<key>top-level-let-expression-body</key>
 		<dict>
+			<key>comment</key>
+			<string>The opening = is assignment; RHS signs are comparisons. Yielding to declaration keywords also prematurely ends the scope at inner let-expressions.</string>
 			<key>name</key>
 			<string>meta.binding.macro.alloy</string>
 			<key>begin</key>
@@ -359,6 +369,8 @@
 		</dict>
 		<key>top-level-let-block-body</key>
 		<dict>
+			<key>comment</key>
+			<string>expression-blocks consumes the balanced brace body before this wrapper ends.</string>
 			<key>name</key>
 			<string>meta.binding.macro.alloy</string>
 			<key>begin</key>
@@ -381,25 +393,49 @@
 				</dict>
 			</array>
 		</dict>
-		<key>callable-declaration-parameters</key>
+		<key>callable-declarations</key>
 		<dict>
-			<key>contentName</key>
-			<string>meta.brackets.alloy meta.parameters.alloy</string>
+			<key>comment</key>
+			<string>Carry the header across comments and line breaks. A nested parameter list owns its delimiters; leave the return-type : or body { to root expression rules.</string>
 			<key>begin</key>
-			<string>\b(fun|pred)\b\s+([A-Za-z_][A-Za-z0-9_]*)\s*(\[)</string>
+			<string>\b(fun|pred)\b</string>
 			<key>beginCaptures</key>
 			<dict>
-				<key>1</key>
+				<key>0</key>
 				<dict>
 					<key>name</key>
 					<string>storage.type.function.alloy keyword.declaration.function.alloy</string>
 				</dict>
-				<key>2</key>
+			</dict>
+			<key>end</key>
+			<string>(?=[:{])</string>
+			<key>patterns</key>
+			<array>
 				<dict>
-					<key>name</key>
-					<string>variable.other.alloy</string>
+					<key>include</key>
+					<string>#comments</string>
 				</dict>
-				<key>3</key>
+				<dict>
+					<key>include</key>
+					<string>#callable-declaration-parameters</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#identifiers</string>
+				</dict>
+			</array>
+		</dict>
+		<key>callable-declaration-parameters</key>
+		<dict>
+			<key>comment</key>
+			<string>Parameter lists are optional. Enter at [ within a callable header; nested expression brackets shield inner ] tokens.</string>
+			<key>contentName</key>
+			<string>meta.brackets.alloy meta.parameters.alloy</string>
+			<key>begin</key>
+			<string>\[</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>0</key>
 				<dict>
 					<key>name</key>
 					<string>punctuation.section.brackets.begin.alloy</string>
@@ -449,6 +485,8 @@
 		</dict>
 		<key>identifier-list-items</key>
 		<dict>
+			<key>comment</key>
+			<string>Untyped identifiers shared by module arguments and macro parameters.</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -527,6 +565,8 @@
 		</dict>
 		<key>module-declarations-and-imports</key>
 		<dict>
+			<key>comment</key>
+			<string>Paths lack a terminator; the next declaration keyword or modifier is a conservative boundary, not a complete path parse.</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -598,12 +638,16 @@
 					<string>\b(abstract|private|var)\b(?!\$)</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Treat multiplicities as modifiers when sig follows on this line, allowing comments and other modifiers. Exclude sig$.</string>
 					<key>name</key>
 					<string>storage.modifier.alloy</string>
 					<key>match</key>
 					<string>\b(one|lone|some)\b(?=(?:(?:\s+)|/\*[\s\S]*?\*/|//[^\r\n]*|--[^\r\n]*|\b(?:abstract|private|var|one|lone|some)\b)*\bsig\b(?!\$))</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Keep hierarchy and fields together. Nested contexts shield inner braces; a following signature fact block is handled at the root.</string>
 					<key>begin</key>
 					<string>(?=\bsig\b(?!\$))</string>
 					<key>end</key>
@@ -630,6 +674,8 @@
 		</dict>
 		<key>meta-identifiers</key>
 		<dict>
+			<key>comment</key>
+			<string>Recognize $-suffixed meta-identifiers before keyword and identifier fallbacks.</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -669,6 +715,8 @@
 					<string>\b(enabled|event|invariant|modifies)\b</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Built-in signature/scope names; earlier expression rules override int and seq within expression contexts.</string>
 					<key>name</key>
 					<string>support.type.alloy</string>
 					<key>match</key>
@@ -684,6 +732,8 @@
 		</dict>
 		<key>expression-groups</key>
 		<dict>
+			<key>comment</key>
+			<string>Recursive delimiters shield nested tokens from enclosing declaration boundaries.</string>
 			<key>name</key>
 			<string>meta.group.alloy</string>
 			<key>begin</key>
@@ -716,6 +766,8 @@
 		</dict>
 		<key>expression-brackets</key>
 		<dict>
+			<key>comment</key>
+			<string>Nested ] tokens belong to this context, not the enclosing parameter list.</string>
 			<key>name</key>
 			<string>meta.brackets.alloy</string>
 			<key>begin</key>
@@ -754,6 +806,8 @@
 		</dict>
 		<key>expression-blocks</key>
 		<dict>
+			<key>comment</key>
+			<string>Balance braces for formulas, expressions, and comprehensions without parsing their structure.</string>
 			<key>name</key>
 			<string>meta.block.alloy</string>
 			<key>begin</key>
@@ -786,6 +840,8 @@
 		</dict>
 		<key>block-expressions</key>
 		<dict>
+			<key>comment</key>
+			<string>Order matters: multiplicity modifiers before word operators, punctuation before overlapping operators, and int/seq expression roles before built-in names. No precedence parsing.</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -809,6 +865,8 @@
 					<string>#expression-blocks</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>After : or -&gt;, wait across whitespace/comments for an optional multiplicity modifier; otherwise return without consuming the next token. Preserve :&gt;.</string>
 					<key>begin</key>
 					<string>(:)(?!&gt;)|(-&gt;)</string>
 					<key>beginCaptures</key>
@@ -847,12 +905,16 @@
 					</array>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Same-line fallback when the declaration rule already consumed :.</string>
 					<key>name</key>
 					<string>storage.modifier.alloy</string>
 					<key>match</key>
 					<string>(?&lt;=:)\s*(one|lone|some|set)\b</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Same-line fallback after an already-consumed arrow.</string>
 					<key>name</key>
 					<string>storage.modifier.alloy</string>
 					<key>match</key>
@@ -869,6 +931,8 @@
 					<string>\b(disj|var)\b(?!\$)</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Modifier only if -&gt; follows on this line. An arrow on a later line cannot be detected.</string>
 					<key>name</key>
 					<string>storage.modifier.alloy</string>
 					<key>match</key>
@@ -893,6 +957,8 @@
 					<string>\b(always|eventually|after|before|until|releases|since|triggered|historically|once)\b</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Expression bindings end before a single | or a body brace. The brace lookahead excludes only simple name: comprehensions.</string>
 					<key>name</key>
 					<string>meta.binding.let.alloy</string>
 					<key>begin</key>
@@ -910,6 +976,8 @@
 					<key>patterns</key>
 					<array>
 						<dict>
+							<key>comment</key>
+							<string>Consume the binding = as assignment; RHS signs are comparisons. Leave the body delimiter unconsumed.</string>
 							<key>name</key>
 							<string>meta.binding.let.alloy</string>
 							<key>begin</key>
@@ -935,6 +1003,8 @@
 									<string>#strings</string>
 								</dict>
 								<dict>
+									<key>comment</key>
+									<string>A top-level comma starts another binding. Consume its = as assignment, or yield if no binding follows.</string>
 									<key>begin</key>
 									<string>,</string>
 									<key>beginCaptures</key>
@@ -990,18 +1060,24 @@
 					<string>\b(in)\b</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Expression operators; precede the int command-scope fallback.</string>
 					<key>name</key>
 					<string>keyword.operator.word.alloy</string>
 					<key>match</key>
 					<string>\b(sum|int)\b</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Type-constructor modifier, distinct from the seq command-scope name.</string>
 					<key>name</key>
 					<string>storage.modifier.alloy</string>
 					<key>match</key>
 					<string>\b(seq)\b</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>; is a temporal logical operator, not punctuation.</string>
 					<key>name</key>
 					<string>keyword.operator.logical.alloy</string>
 					<key>match</key>
@@ -1048,12 +1124,16 @@
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>comment</key>
+					<string>Match command ranges .. before the join operator .</string>
 					<key>name</key>
 					<string>punctuation.separator.alloy</string>
 					<key>match</key>
 					<string>\.\.</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Preserve :&gt; and || as operators; match only the single binder |.</string>
 					<key>name</key>
 					<string>punctuation.separator.alloy</string>
 					<key>match</key>
@@ -1111,6 +1191,8 @@
 		</dict>
 		<key>signature-hierarchy</key>
 		<dict>
+			<key>comment</key>
+			<string>Keep the hierarchy after sig until {, across lines. Here = is assignment and in/extends are hierarchy keywords.</string>
 			<key>name</key>
 			<string>meta.signature.hierarchy.alloy</string>
 			<key>begin</key>
@@ -1169,6 +1251,8 @@
 		</dict>
 		<key>signature-fields</key>
 		<dict>
+			<key>comment</key>
+			<string>Field declarations precede expression fallbacks; nested contexts shield their own closing braces.</string>
 			<key>name</key>
 			<string>meta.block.signature.fields.alloy</string>
 			<key>begin</key>
@@ -1219,18 +1303,15 @@
 		</dict>
 		<key>field-declaration-value</key>
 		<dict>
+			<key>comment</key>
+			<string>Leave : to expression rules, which retain an optional multiplicity across comments and lines; consume assignment = here. End at an unnested comma or }.</string>
 			<key>name</key>
 			<string>meta.declaration.field-value.alloy</string>
 			<key>begin</key>
-			<string>(:)(?!&gt;)|(=)</string>
+			<string>(?=:(?!&gt;))|(=)</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.separator.alloy</string>
-				</dict>
-				<key>2</key>
 				<dict>
 					<key>name</key>
 					<string>keyword.operator.assignment.alloy</string>
@@ -1248,18 +1329,15 @@
 		</dict>
 		<key>callable-parameter-value</key>
 		<dict>
+			<key>comment</key>
+			<string>As for field values, leave : to expression rules and consume assignment = here. End at an unnested comma or ].</string>
 			<key>name</key>
 			<string>meta.declaration.parameter-value.alloy</string>
 			<key>begin</key>
-			<string>(:)(?!&gt;)|(=)</string>
+			<string>(?=:(?!&gt;))|(=)</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.separator.alloy</string>
-				</dict>
-				<key>2</key>
 				<dict>
 					<key>name</key>
 					<string>keyword.operator.assignment.alloy</string>

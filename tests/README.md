@@ -52,7 +52,8 @@ The fixture corpus is organized around eight files:
 - `signatures.als`: signature hierarchies, fields, modifiers, multiplicities,
   `seq` field types, and enums.
 - `declarations.als`: facts, predicates, functions, parameters, return types,
-  empty declarations, assertions, and top-level `let` macros.
+  comments and line breaks within callable headers, empty declarations,
+  assertions, and top-level `let` macros.
 - `commands.als`: `run` and `check` forms, scopes, expectations, and multiline
   command syntax.
 - `formulas.als`: quantified formulas, multiplicity roles, comprehensions,

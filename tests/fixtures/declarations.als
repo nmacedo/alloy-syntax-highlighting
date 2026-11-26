@@ -245,3 +245,58 @@ let macroBlockNestedLet {
 }
 
 let inlineMacroBeforeLet = univ let followingInlineMacro = univ
+
+// Initial let chains are expression prefixes, even across comments and lines.
+let initialLetComments = /* first */ // still awaiting the expression
+  -- still awaiting the expression
+  /* second */ let x = univ |
+    let y = x | y
+
+let initialLetAdjacent = let x = univ | x let afterInitialLetAdjacent = univ
+let initialLetComparison = let x = univ | x = univ
+let initialLetLineComparison = let x = univ | x
+  = univ
+pred afterInitialLetChains { some univ }
+
+// Still requires tracking an operand position inside an undelimited macro RHS.
+let remainingLetAfterOperator = univ + let x = univ | x
+
+// Comments and line breaks between callable header tokens.
+pred /* keyword/name gap */ headerBlockBeforeName[x = A] {}
+fun headerBlockBeforeBracket /* name/bracket gap */ [x = A]: A { x }
+pred /* keyword/name
+  gap */ headerMultilineBlock /* name/bracket
+  gap */ [x = A] { some x }
+fun // keyword/name gap
+  headerLineComments // name/bracket gap
+  [x = A]: A { x }
+pred
+  headerSplit
+  [x = A] { some x }
+
+// Nested expressions retain comparisons and own their brackets and commas.
+pred /** keyword/name gap */ headerNested -- name/bracket gap
+  /* before parameters */ [
+    x = (A = B implies A else B),
+    y: iden[A],
+    z = {a: A | a = a}
+  ] { x = x }
+
+// Optional parameters: stop the header before the return type or body.
+pred /* gap */ headerNoParamsPred // body follows
+  { let x = A | x = A }
+fun /* gap */ headerNoParamsFun -- return type follows
+  : A = B implies A else B { A }
+fact afterSplitHeaders { A = A }
+
+// Comment delimiters shield header punctuation; spaces are not required.
+pred/* : { [ ] } */headerTight[x = A] { some x }
+fun headerTightFun/* : { [ ] } */[x = A]: A { x }
+
+// Parameter multiplicities after the declaration separator.
+pred boundaryParameterControl[x: one univ] { some x }
+pred boundaryParameterComment[x: /* gap */ one univ] { some x }
+pred boundaryParameterSplit[x:
+  lone univ] { some x }
+pred boundaryParameterLineComment[x: // gap
+  some univ] { some x }

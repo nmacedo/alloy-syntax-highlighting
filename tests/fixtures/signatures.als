@@ -77,3 +77,22 @@ run {} for 0 but 1 int, 2 steps
 // Long whitespace checks that signature-hierarchy context survives history compaction.
 sig                                                                                Child in A {}
 
+
+// Signature modifiers need to survive comments and line breaks before sig.
+one /* same-line gap */ sig BoundarySigControl {}
+one
+sig BoundarySigSplit {}
+lone // keyword follows on the next line
+sig BoundarySigLineComment {}
+some /* split
+  gap */ sig BoundarySigBlockComment {}
+
+// Field multiplicities after the declaration separator.
+sig BoundaryFields {
+  control: one univ,
+  commented: /* gap */ one univ,
+  split:
+    lone univ,
+  lineComment: // gap
+    some univ
+}

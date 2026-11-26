@@ -1,14 +1,17 @@
 # Alloy syntax highlighting for VS Code
 
 Syntax highlighting for Alloy 6 `.als` files using a TextMate grammar.
-Release version: `1.0.0` (`v1.0.0`).
+Release version: `1.1.0` (`v1.1.0`).
 
 ## Install and use
 
 The release repository contains the extension source. Marketplace publication
-and a downloadable VSIX are not configured. To run the extension locally,
-open the repository in VS Code and start the Extension Development Host with
-**Run → Start Debugging**.
+and a downloadable VSIX are not configured. From a local clone of the release
+repository, launch an Extension Development Host with the VS Code CLI:
+
+```sh
+code --extensionDevelopmentPath="$PWD"
+```
 
 The extension associates `.als` files with Alloy syntax highlighting.
 

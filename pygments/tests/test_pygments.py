@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import runpy
 import sys
 import unittest
 from pathlib import Path
@@ -94,6 +95,31 @@ class PygmentsFixtureTests(unittest.TestCase):
     def setUpClass(cls):
         cls.expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
         cls.lexer = AlloyLexer()
+
+    def test_token_stream_preserves_source_and_offsets(self):
+        sources = {path.name: path.read_text(encoding="utf-8")
+                   for path in FIXTURES.glob("*.als")}
+        sources["header whitespace"] = "fun\n\tf \t[x:A, y=B]: A { x }\r\n"
+        for name, source in sources.items():
+            with self.subTest(source=name):
+                cursor = 0
+                pieces = []
+                for start, token, value in self.lexer.get_tokens_unprocessed(source):
+                    self.assertEqual(start, cursor)
+                    self.assertNotIn(token, Token.Error)
+                    if name == "header whitespace" and value.isspace():
+                        self.assertEqual(token, Token.Text)
+                    cursor += len(value)
+                    pieces.append(value)
+                self.assertEqual("".join(pieces), source)
+                self.assertEqual(cursor, len(source))
+
+    def test_translator_rejects_unsupported_capture_layouts(self):
+        compiler_type = runpy.run_path(str(ROOT / "pygments" / "build.py"))["Compiler"]
+        compiler = compiler_type({})
+        for pattern in ("(a)b", "((a))", "(?:a)(b)"):
+            with self.subTest(pattern=pattern), self.assertRaises(ValueError):
+                compiler.capture_action(pattern, {"1": {"name": "variable.other.alloy"}}, None)
 
     def test_fixtures_against_normalized_scope_expectations(self):
         failures = []

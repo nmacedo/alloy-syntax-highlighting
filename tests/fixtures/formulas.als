@@ -191,3 +191,18 @@ pred multiplicitiesAcrossLineComments {
   some A
 }
 
+
+// The same line prefix as an arrow modifier can instead end with a test.
+pred multiplicityWithoutFutureArrow {
+  none in none one /* first */ // the next line contains no arrow
+    /* second */ univ
+}
+
+// A comprehension RHS must not end the enclosing let binding list.
+pred boundaryLetComprehensions {
+  let x = {a: univ | a = a}, y = univ | y = y
+  let x = {
+    a: univ | a = a
+  }, splitY = univ | splitY = splitY
+  let x = { /* gap */ a: univ | a = a}, commentY = univ | commentY = commentY
+}

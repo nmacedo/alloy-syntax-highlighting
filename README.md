@@ -1,8 +1,8 @@
 # Alloy syntax highlighting
 
 Syntax highlighting for Alloy 6 across VS Code, Sublime Text, Pygments, and
-CodeMirror 6. The configured release version is `1.0.0`; the shared release
-tag is `v1.0.0`. The canonical, hand-maintained grammar is
+CodeMirror 6. Version `1.1.0` uses the shared release tag `v1.1.0`.
+The canonical, hand-maintained grammar is
 [`grammar/alloy.tmLanguage.json`](./grammar/alloy.tmLanguage.json); platform
 artifacts are generated from it.
 

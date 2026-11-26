@@ -4586,6 +4586,518 @@
       "line": 243,
       "token": "let",
       "scope": "meta.binding.let.alloy"
+    },
+    {
+      "line": 250,
+      "token": "let",
+      "scope": "keyword.declaration.function.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 250,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 252,
+      "token": "let",
+      "scope": "keyword.operator.word.alloy"
+    },
+    {
+      "line": 252,
+      "token": "let",
+      "scope": "meta.binding.let.alloy"
+    },
+    {
+      "line": 253,
+      "token": "let",
+      "scope": "keyword.operator.word.alloy"
+    },
+    {
+      "line": 253,
+      "token": "let",
+      "scope": "meta.binding.let.alloy"
+    },
+    {
+      "line": 255,
+      "token": "let",
+      "scope": "keyword.declaration.function.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 255,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 255,
+      "token": "let",
+      "scope": "keyword.operator.word.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 255,
+      "token": "let",
+      "scope": "meta.binding.let.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 255,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 255,
+      "token": "let",
+      "scope": "keyword.declaration.function.alloy",
+      "occurrence": 2
+    },
+    {
+      "line": 255,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy",
+      "occurrence": 2
+    },
+    {
+      "line": 256,
+      "token": "let",
+      "scope": "keyword.declaration.function.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 256,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 256,
+      "token": "let",
+      "scope": "keyword.operator.word.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 256,
+      "token": "let",
+      "scope": "meta.binding.let.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 256,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 256,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy",
+      "occurrence": 2
+    },
+    {
+      "line": 257,
+      "token": "let",
+      "scope": "keyword.declaration.function.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 257,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 257,
+      "token": "let",
+      "scope": "keyword.operator.word.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 257,
+      "token": "let",
+      "scope": "meta.binding.let.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 257,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 259,
+      "token": "pred",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 262,
+      "token": "let",
+      "scope": "keyword.declaration.function.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 262,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 262,
+      "token": "let",
+      "scope": "keyword.operator.word.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 262,
+      "token": "let",
+      "scope": "meta.binding.let.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 262,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 258,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy"
+    },
+    {
+      "line": 265,
+      "token": "pred",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 265,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 265,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 265,
+      "token": "[",
+      "scope": "punctuation.section.brackets.begin.alloy"
+    },
+    {
+      "line": 265,
+      "token": "]",
+      "scope": "punctuation.section.brackets.end.alloy"
+    },
+    {
+      "line": 265,
+      "token": "/* keyword/name gap */",
+      "scope": "comment.block.alloy"
+    },
+    {
+      "line": 266,
+      "token": "fun",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 266,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 266,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 266,
+      "token": "[",
+      "scope": "punctuation.section.brackets.begin.alloy"
+    },
+    {
+      "line": 266,
+      "token": "]",
+      "scope": "punctuation.section.brackets.end.alloy"
+    },
+    {
+      "line": 266,
+      "token": "/* name/bracket gap */",
+      "scope": "comment.block.alloy"
+    },
+    {
+      "line": 267,
+      "token": "pred",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 269,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 269,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 269,
+      "token": "[",
+      "scope": "punctuation.section.brackets.begin.alloy"
+    },
+    {
+      "line": 269,
+      "token": "]",
+      "scope": "punctuation.section.brackets.end.alloy"
+    },
+    {
+      "line": 270,
+      "token": "fun",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 272,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 272,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 272,
+      "token": "[",
+      "scope": "punctuation.section.brackets.begin.alloy"
+    },
+    {
+      "line": 272,
+      "token": "]",
+      "scope": "punctuation.section.brackets.end.alloy"
+    },
+    {
+      "line": 273,
+      "token": "pred",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 275,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 275,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 275,
+      "token": "[",
+      "scope": "punctuation.section.brackets.begin.alloy"
+    },
+    {
+      "line": 275,
+      "token": "]",
+      "scope": "punctuation.section.brackets.end.alloy"
+    },
+    {
+      "line": 278,
+      "token": "pred",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 278,
+      "token": "keyword/name gap",
+      "scope": "comment.block.documentation.alloy"
+    },
+    {
+      "line": 279,
+      "token": "/* before parameters */",
+      "scope": "comment.block.alloy"
+    },
+    {
+      "line": 280,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 280,
+      "token": "=",
+      "occurrence": 1,
+      "scope": "keyword.operator.comparison.alloy"
+    },
+    {
+      "line": 280,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 280,
+      "token": "x",
+      "scope": "meta.brackets.alloy"
+    },
+    {
+      "line": 281,
+      "token": "y",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 281,
+      "token": ":",
+      "scope": "punctuation.separator.alloy"
+    },
+    {
+      "line": 281,
+      "token": "A",
+      "scope": "variable.other.alloy"
+    },
+    {
+      "line": 282,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 282,
+      "token": "=",
+      "occurrence": 1,
+      "scope": "keyword.operator.comparison.alloy"
+    },
+    {
+      "line": 282,
+      "token": "z",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 283,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy",
+      "notScopes": [
+        "meta.parameters.alloy"
+      ]
+    },
+    {
+      "line": 283,
+      "token": "]",
+      "scope": "punctuation.section.brackets.end.alloy"
+    },
+    {
+      "line": 286,
+      "token": "pred",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 287,
+      "token": "let",
+      "scope": "keyword.operator.word.alloy",
+      "notScopes": [
+        "meta.parameters.alloy"
+      ]
+    },
+    {
+      "line": 287,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 287,
+      "token": "=",
+      "occurrence": 1,
+      "scope": "keyword.operator.comparison.alloy"
+    },
+    {
+      "line": 288,
+      "token": "fun",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 289,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy",
+      "notScopes": [
+        "meta.parameters.alloy"
+      ]
+    },
+    {
+      "line": 290,
+      "token": "fact",
+      "scope": "keyword.declaration.fact.alloy"
+    },
+    {
+      "line": 290,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy",
+      "notScopes": [
+        "meta.parameters.alloy"
+      ]
+    },
+    {
+      "line": 293,
+      "token": "pred",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 293,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 293,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 294,
+      "token": "fun",
+      "scope": "keyword.declaration.function.alloy"
+    },
+    {
+      "line": 294,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 294,
+      "token": "x",
+      "scope": "meta.parameters.alloy"
+    },
+    {
+      "line": 297,
+      "token": "one",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 298,
+      "token": "one",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 300,
+      "token": "lone",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 302,
+      "token": "some",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
     }
   ],
   "formulas.als": [
@@ -5478,6 +5990,66 @@
       "line": 191,
       "token": "some",
       "scope": "keyword.operator.word.alloy"
+    },
+    {
+      "line": 197,
+      "token": "one",
+      "scope": "keyword.operator.word.alloy",
+      "notScopes": [
+        "storage.modifier.alloy"
+      ]
+    },
+    {
+      "line": 203,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy",
+      "occurrence": 2
+    },
+    {
+      "line": 203,
+      "token": "=",
+      "scope": "meta.binding.let.alloy",
+      "occurrence": 2
+    },
+    {
+      "line": 203,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy",
+      "occurrence": 3
+    },
+    {
+      "line": 206,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy"
+    },
+    {
+      "line": 206,
+      "token": "=",
+      "scope": "meta.binding.let.alloy"
+    },
+    {
+      "line": 206,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy",
+      "occurrence": 1
+    },
+    {
+      "line": 207,
+      "token": "=",
+      "scope": "keyword.operator.assignment.alloy",
+      "occurrence": 2
+    },
+    {
+      "line": 207,
+      "token": "=",
+      "scope": "meta.binding.let.alloy",
+      "occurrence": 2
+    },
+    {
+      "line": 207,
+      "token": "=",
+      "scope": "keyword.operator.comparison.alloy",
+      "occurrence": 3
     }
   ],
   "literals.als": [
@@ -7041,6 +7613,70 @@
       "token": "in",
       "occurrence": 0,
       "scope": "keyword.other.alloy"
+    },
+    {
+      "line": 82,
+      "token": "one",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 83,
+      "token": "one",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 85,
+      "token": "lone",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 87,
+      "token": "some",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 92,
+      "token": "one",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 93,
+      "token": "one",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 95,
+      "token": "lone",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
+    },
+    {
+      "line": 97,
+      "token": "some",
+      "scope": "storage.modifier.alloy",
+      "notScopes": [
+        "keyword.operator.word.alloy"
+      ]
     }
   ]
 }

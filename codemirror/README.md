@@ -1,12 +1,12 @@
 # Alloy syntax highlighting for CodeMirror 6
 
 CodeMirror 6 `StreamLanguage` support for Alloy 6.
-Release version: `1.0.0` (`v1.0.0`).
+Release version: `1.1.0` (`v1.1.0`).
 
 ## Install
 
 ```sh
-npm install github:nmacedo/alloy-codemirror-highlighting#v1.0.0
+npm install github:nmacedo/alloy-codemirror-highlighting#v1.1.0
 ```
 
 This installs the tagged source from the platform repository. npm registry
